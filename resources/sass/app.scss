@@ -1,0 +1,97 @@
+// The following two lines import the default Sencha Touch theme. If you are building
+// a new theme, remove them and the add your own CSS on top of the base CSS (which
+// is already included in your app.json file).
+// @import 'sencha-touch/default';
+// @import 'sencha-touch/default/all';
+
+
+// Custom code goes here..
+
+// Theme wechseln alles erklärt im Video //http://vimeo.com/66191847
+
+
+
+//Color änderen muss vor den Import erscheinen
+$base-color: #5E5E5E; /* schwarz  */
+$active-color: #304FA0; //in den Icons und wenn auf listen tab't
+$base-gradient: 'glossy';  //default ist 'matte'
+$loading-spinner-color: #F29700  ; //hier in Firmenfarbe
+$buttons-color: #98D126;
+
+
+// You may remove any of the following modules that you
+// do not use in order to create a smaller css file.
+//@import 'sencha-touch/base';
+//@import 'sencha-touch/base/all';
+@import 'sencha-touch/default';
+@import 'sencha-touch/default/all';
+//@import 'sencha-touch/cupertino';
+//@import 'sencha-touch/cupertino/all';
+
+div {
+    -webkit-user-select: auto;
+}
+
+
+
+// Examples of using the icon mixin:
+// @include icon('user');
+
+// Custom code goes here..
+html, body { background-color: #efefef; }
+
+/* our custom imports */
+@import 'include/Ext.ux.TouchCalendarView';
+@import 'include/skin1';
+@import 'include/Ext.ux.TouchCalendarEvents';
+@import 'include/listen';
+@import 'include/tabellen_tree';
+@import 'include/menue';
+@import 'include/text';
+
+
+//@import 'include/form';
+//@import 'include/panel';
+//@import 'include/titlebar';
+
+
+// compass watch zum Erzeugen der css files
+
+// Icons und Fonts
+//http://druckit.wordpress.com/2013/04/04/changes-to-sencha-touch-2-2-theming-part-1-using-iconography/
+// http://www.sencha.com/blog/hello-sencha-touch-2-2/
+// http://vimeo.com/sencha/videos
+// Alle infos hier http://vimeo.com/66191690
+// eigene Icons http://icomoon.io/app/
+@include icon-font('IcoMoon', inline-font-files('pictos/icomoon.woff', woff, 'pictos/icomoon.ttf', truetype,'pictos/icomoon.svg', svg));
+
+@include icon('user3','!','IcoMoon'); //Kunde mit Kravatte
+@include icon('buch','"','IcoMoon'); //2 Koepf
+@include icon('user_list','#','IcoMoon'); //Notizblock
+@include icon('compose2','$','IcoMoon'); //Buch geschlossen
+@include icon('stift','%','IcoMoon'); //Stift
+@include icon('hochhaus','&','IcoMoon'); //Hochhaus mit Haus
+@include icon('haus','e','IcoMoon'); //Haus mit Schornstein
+@include icon('euro_verboten','a','IcoMoon'); //euro_verboten
+@include icon('euro_hell','b','IcoMoon'); //euro_hell
+@include icon('euro_dunkel','c','IcoMoon'); //euro_dunkel
+@include icon('plus','+','IcoMoon'); //Plus
+@include icon('minus','-','IcoMoon'); //Minus
+@include icon('runter','r','IcoMoon'); //Pfeil runter
+@include icon('hoch','h','IcoMoon'); //Pfeil hoch
+@include icon('quer','s','IcoMoon'); //Pfeile nach links und rechts
+@include icon('alle','l','IcoMoon'); //Kopf mit Pluszeichen 
+@include icon('undo','u','IcoMoon'); //undo 
+@include icon('search','f','IcoMoon'); //search (Lupe)
+@include icon('filter','d','IcoMoon'); //filter 
+@include icon('loop','g','IcoMoon'); //loop 
+
+// Examples of using the icon mixin:
+// @include icon('user');
+
+@import 'include/icons';
+
+
+
+
+

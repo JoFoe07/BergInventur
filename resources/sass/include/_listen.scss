@@ -1,0 +1,184 @@
+/* Move the disclosure button up to account for the list item height increase */
+
+.x-list .x-list-disclosure {
+position: relative;
+overflow: visible;
+border: 0;
+-webkit-border-radius: 32px;
+-moz-border-radius: 32px;
+-ms-border-radius: 32px;
+-o-border-radius: 32px;
+border-radius: 40px;
+background-image: none;
+background-color: rgb(64, 67, 75);
+background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #F29700), color-stop(3%, #E68E00), color-stop(100%, #CF7F00));
+background-image: -webkit-linear-gradient(top, #F29700,#E68E00 3%,#CF7F00);
+background-image: -moz-linear-gradient(top, #F29700,#E68E00 3%,#CF7F00);
+background-image: -o-linear-gradient(top, #F29700,#E68E00 3%,#CF7F00);
+background-image: linear-gradient(top, #F29700,#E68E00 3%,#CF7F00);
+width: 32px;
+height: 32px;
+margin: 7px 7px 0 0;
+}
+
+
+.x-list-menuopt .x-list-disclosure {
+
+        width: 12px;
+		background-color: #0F0F0F;
+        height: 1.5em;
+        margin: .4em .4em 0 .5em;   
+        -webkit-mask: none;  
+        -webkit-mask-box-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAUCAYAAAC58NwRAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAZdEVYdFNvZnR3YXJlAFBhaW50Lk5FVCB2My41LjbQg61aAAAAc0lEQVQ4T2NgGGagtLS0DoSJ8hZIYVlZ2X8QJkoTUFELTAOILikpqSZoE7ma2tFsqiDGJtI0FRYWSgOd9xYpEJ4AxYSw2gRVfBtNsQqdFdvb27MA3XyEKGfA3AZ0uwpQ0xMQBrEJBiVIAUgh0YqJMpEuigDEnX39an6ddgAAAABJRU5ErkJggg==');
+}
+
+.x-list-menuopt .x-list-disclosure:before {
+		content: none;
+		
+}
+
+.list-item-hinzu-icon .x-button-icon ,
+.list-item-umsatz-icons-gruen .x-button-icon ,
+.list-item-umsatz-icons-rot .x-button-icon, 
+.list-item-umsatz-icons .x-button-icon
+{
+width: 15px;
+height: 20px;
+font-size: 69%;
+}
+
+.list-item-umsatz-icons .x-button-icon, 
+.list-item-umsatz-alle .x-innerhtml  
+{color: #ffffff !important;}
+
+.list-item-umsatz .x-input-el, 
+.list-item-umsatz-positiv .x-input-el, 
+.list-item-umsatz-negativ .x-input-el
+{
+text-align:right;
+font-size: 90%;
+}
+
+.list-item-umsatz-negativ .x-form-label, 
+.list-item-umsatz-positiv .x-form-label 
+{
+text-align:left;
+font-size: 90%;
+font-weight:bold;
+}
+
+.list-item-umsatz-positiv .x-innerhtml, 
+.list-item-umsatz-negativ .x-innerhtml, 
+.list-item-umsatz-alle .x-innerhtml 
+{font-size: 90%;}
+
+.list-item-umsatz-negativ .x-form-label, 
+.list-item-umsatz-negativ .x-innerhtml, 
+.list-item-umsatz-negativ .x-input-el, 
+.list-item-umsatz-icons-rot .x-button-icon  
+{color: #ff0000 !important;}
+
+.list-item-umsatz-positiv .x-form-label,
+.list-item-umsatz-positiv .x-innerhtml, 
+.list-item-umsatz-positiv .x-input-el, 
+.list-item-umsatz-icons-gruen .x-button-icon   
+{color: #009900 !important;}
+
+
+
+
+
+
+// Frabe des Hackens ändern (Anmeldung)
+/* Text im Searchfield sichtbar – hoher Selektor trifft alle Engines */
+.x-field-search.mitarbeiter-suche .x-input-el,
+.x-field-search.mitarbeiter-suche input[type="search"],
+.mitarbeiter-suche .x-input .x-input-el {
+  color: #111 !important;
+  -webkit-text-fill-color: #111 !important; /* Safari */
+  caret-color: #111 !important;
+  text-shadow: none !important;
+  opacity: 1 !important;
+  background: #fff; /* optional */
+}
+
+/* Platzhalter in allen Browsern */
+.x-field-search.mitarbeiter-suche .x-input-el::placeholder { color:#888; opacity:1; }
+.x-field-search.mitarbeiter-suche .x-input-el::-webkit-input-placeholder { color:#888; }
+.x-field-search.mitarbeiter-suche .x-input-el:-ms-input-placeholder { color:#888; }
+.x-field-search.mitarbeiter-suche .x-input-el::-ms-input-placeholder { color:#888; }
+.x-field-search.mitarbeiter-suche .x-input-el::-moz-placeholder { color:#888; opacity:1; }
+
+/* falls ein Theme irgendwo die Eingabe durch Filter versteckt */
+.x-field-search.mitarbeiter-suche .x-input,
+.x-field-search.mitarbeiter-suche .x-input-el {
+  filter: none !important;
+}
+
+
+
+
+.list-item-title
+{
+    float:left;
+    width:100%;
+    font-size:90%;
+    white-space: nowrap;  
+    overflow: hidden;  
+    text-overflow: ellipsis;  
+    padding-right:25px;
+    line-height:150%;
+}
+.list-item-narrative
+{
+    float:left;
+    width:95%;
+    color:#666666;
+    font-size:80%;
+    white-space: nowrap;  
+    overflow: hidden;  
+    text-overflow: ellipsis;   
+    padding-right:25px;
+}
+.x-item-selected .list-item-title 
+{
+    color:#fff000;
+}
+.x-item-selected .list-item-narrative
+{
+    color:#ffffff;
+}
+.notes-list-empty-text 
+{
+    padding:10px;
+}
+/* line 368, ../themes/stylesheets/sencha-touch/default/widgets/_list.scss */
+.x-list-paging {
+  padding: 1em 0;
+}
+/* line 370, ../themes/stylesheets/sencha-touch/default/widgets/_list.scss */
+.x-list-paging .x-loading-spinner {
+  display: none;
+  margin: auto;
+}
+/* line 375, ../themes/stylesheets/sencha-touch/default/widgets/_list.scss */
+.x-list-paging .x-list-paging-msg {
+  text-align: center;
+  color: #2D4B97;
+  clear: both;
+  -webkit-border-radius: 6px;
+  border-radius: 6px;
+}
+/* line 382, ../themes/stylesheets/sencha-touch/default/widgets/_list.scss */
+.x-list-paging.x-loading {
+  padding: 0.5em;
+}
+/* line 385, ../themes/stylesheets/sencha-touch/default/widgets/_list.scss */
+.x-list-paging.x-loading .x-loading-spinner {
+  display: block;
+}
+/* line 389, ../themes/stylesheets/sencha-touch/default/widgets/_list.scss */
+.x-list-paging.x-loading .x-list-paging-msg {
+  display: none;
+}
+

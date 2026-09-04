@@ -1,0 +1,10 @@
+$include-all-icons: true !default;
+
+@if $include-all-icons {
+	@include icon-font('Pictos', inline-font-files('pictos/pictos-web.woff', woff, 'pictos/pictos-web.ttf', truetype,'pictos/pictos-web.svg', svg));
+	@include icon('info');
+	@include icon('user');
+	@include icon('team');
+	@include icon('trash');
+	
+	}
