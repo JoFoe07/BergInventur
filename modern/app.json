@@ -1,0 +1,38 @@
+{
+    "name": "BergInventurModern",
+    "namespace": "BergInventurModern",
+    "version": "1.0.0.0",
+    "framework": "ext",
+    "toolkit": "modern",
+    "theme": "theme-material",
+    "requires": [
+        "font-awesome"
+    ],
+    "indexHtmlPath": "index.html",
+    "classpath": [
+        "app"
+    ],
+    "overrides": [
+        "overrides"
+    ],
+    "sass": {
+        "namespace": "BergInventurModern",
+        "etc": [
+            "sass/etc/all.scss"
+        ],
+        "var": [
+            "sass/var"
+        ],
+        "src": [
+            "sass/src"
+        ]
+    },
+    "resources": [],
+    "js": [
+        {
+            "path": "app.js",
+            "bundle": true
+        }
+    ],
+    "id": "1ee057f3-43ee-44df-8cc3-b459381b8bc8"
+}

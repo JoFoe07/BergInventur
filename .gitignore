@@ -2,3 +2,12 @@
 debug.log
 inventur.log
 build/
+
+# Ext JS Modern: SDK, packages and generated build/bootstrap artifacts
+modern/ext/
+modern/build/
+modern/packages/
+modern/bootstrap.js
+modern/bootstrap.json
+modern/bootstrap.jsonp
+modern/bootstrap.css
