@@ -25,8 +25,12 @@ Ext.define('BergInventurModern.view.login.LoginController', {
             ' / Build ' + Ext.String.htmlEncode(BergInventurModern.build)
         );
         this.hideError();
+        this.lookupReference('employeeDisplay').setHidden(true);
+        this.lookupReference('employeeNameDisplay').setHtml('');
         this.lookupReference('standortField').setHidden(true);
         this.lookupReference('standortField').setValue(null);
+        this.lookupReference('standortDisplay').setHidden(true);
+        this.lookupReference('standortNameDisplay').setHtml('');
         this.lookupReference('loginButton').setHidden(true);
         scanField.setHidden(false);
         scanField.setValue('');
@@ -107,18 +111,26 @@ Ext.define('BergInventurModern.view.login.LoginController', {
                 BergInventurModern.session.standort = null;
 
                 scanField.setHidden(true);
+                me.lookupReference('employeeNameDisplay').setHtml(Ext.String.htmlEncode(employeeName));
+                me.lookupReference('employeeDisplay').setHidden(false);
                 me.lookupReference('standortField').setHidden(false);
                 me.lookupReference('standortField').setValue(null);
+                me.lookupReference('standortDisplay').setHidden(true);
+                me.lookupReference('standortNameDisplay').setHtml('');
+                me.lookupReference('loginButton').setHidden(true);
                 me.lookupReference('standortField').focus(true);
             }
         });
     },
 
     onStandortChange: function(selectfield, newValue) {
-        var standort = Ext.String.trim(String(newValue || ''));
+        var standort = Ext.String.trim(String(newValue || '')),
+            standortName = this.getStandortName(standort);
 
-        BergInventurModern.session.standort = null;
-        this.lookupReference('loginButton').setHidden(!this.isValidStandort(standort));
+        BergInventurModern.session.standort = standortName ? standort : null;
+        this.lookupReference('standortNameDisplay').setHtml(Ext.String.htmlEncode(standortName));
+        this.lookupReference('standortDisplay').setHidden(!standortName);
+        this.lookupReference('loginButton').setHidden(!standortName);
     },
 
     onLoginTap: function() {
@@ -160,8 +172,12 @@ Ext.define('BergInventurModern.view.login.LoginController', {
 
         errorDisplay.setHtml(Ext.String.htmlEncode(message));
         errorDisplay.setHidden(false);
+        this.lookupReference('employeeDisplay').setHidden(true);
+        this.lookupReference('employeeNameDisplay').setHtml('');
         this.lookupReference('standortField').setHidden(true);
         this.lookupReference('standortField').setValue(null);
+        this.lookupReference('standortDisplay').setHidden(true);
+        this.lookupReference('standortNameDisplay').setHtml('');
         this.lookupReference('loginButton').setHidden(true);
         scanField.setHidden(false);
         scanField.setValue('');

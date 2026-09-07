@@ -68,6 +68,24 @@ Ext.define('BergInventurModern.view.login.Login', {
                     src: 'resources/images/74sgetdtestra3251gffcbgcAS.png'
                 },
                 {
+                    xtype: 'container',
+                    reference: 'employeeDisplay',
+                    cls: 'bi-login-selection',
+                    hidden: true,
+                    items: [
+                        {
+                            xtype: 'component',
+                            cls: 'bi-login-selection-label',
+                            html: 'Mitarbeiter'
+                        },
+                        {
+                            xtype: 'component',
+                            reference: 'employeeNameDisplay',
+                            cls: 'bi-login-selection-value'
+                        }
+                    ]
+                },
+                {
                     xtype: 'selectfield',
                     reference: 'standortField',
                     cls: 'bi-login-field',
@@ -77,7 +95,7 @@ Ext.define('BergInventurModern.view.login.Login', {
                     autoSelect: false,
                     value: null,
                     defaultPhonePickerConfig: {
-                        doneButton: 'Weiter',
+                        doneButton: 'Übernehmen',
                         cancelButton: 'Abbruch'
                     },
                     options: [
@@ -96,12 +114,30 @@ Ext.define('BergInventurModern.view.login.Login', {
                     }
                 },
                 {
+                    xtype: 'container',
+                    reference: 'standortDisplay',
+                    cls: 'bi-login-selection',
+                    hidden: true,
+                    items: [
+                        {
+                            xtype: 'component',
+                            cls: 'bi-login-selection-label',
+                            html: 'Standort'
+                        },
+                        {
+                            xtype: 'component',
+                            reference: 'standortNameDisplay',
+                            cls: 'bi-login-selection-value'
+                        }
+                    ]
+                },
+                {
                     xtype: 'button',
                     reference: 'loginButton',
                     cls: 'bi-login-button',
                     hidden: true,
                     ui: 'action',
-                    text: 'Anmelden',
+                    text: 'Weiter',
                     listeners: {
                         tap: 'onLoginTap'
                     }

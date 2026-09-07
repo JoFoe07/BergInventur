@@ -51,6 +51,25 @@
     margin-top: 8px;
 }
 
+.bi-login-selection {
+    width: 100%;
+    margin-bottom: 12px;
+    padding: 12px;
+    background: #fff;
+}
+
+.bi-login-selection-label {
+    margin-bottom: 4px;
+    color: #555;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.bi-login-selection-value {
+    font-size: 20px;
+    overflow-wrap: break-word;
+}
+
 .bi-login-result-value {
     margin: 4px 0 18px;
     font-size: 20px;
