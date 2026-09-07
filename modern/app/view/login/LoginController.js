@@ -123,8 +123,8 @@ Ext.define('BergInventurModern.view.login.LoginController', {
         });
     },
 
-    onStandortChange: function(selectfield, newValue) {
-        var standort = Ext.String.trim(String(newValue || '')),
+    onStandortChange: function(selectfield) {
+        var standort = Ext.String.trim(String(selectfield.getValue() || '')),
             standortName = this.getStandortName(standort);
 
         BergInventurModern.session.standort = standortName ? standort : null;
