@@ -10,6 +10,7 @@ Ext.define('BergInventurModern.view.main.MainController', {
     init: function() {
         this.searchStore = null;
         this.searchInProgress = false;
+        this.countState = null;
     },
 
     onSearchActivate: function() {
@@ -125,7 +126,170 @@ Ext.define('BergInventurModern.view.main.MainController', {
             return;
         }
 
-        this.showSelectedResult(record);
+        this.beginCount(record);
+    },
+
+    beginCount: function(record) {
+        var countField = this.lookupReference('countField'),
+            countView = this.lookupReference('countView');
+
+        this.countState = {
+            carlanr: record.get('carlanr'),
+            menge_im_fach: record.get('menge'),
+            gezaehlt: null,
+            zaehler: BergInventurModern.session.employeeName,
+            fachnummer: record.get('fachnummer'),
+            art_text1: record.get('art_text1'),
+            art_herst_art_nr: record.get('art_herst_art_nr'),
+            lagerort: record.get('lagerort'),
+            me_we: record.get('me_we'),
+            ze: record.get('ze'),
+            readyToSave: false,
+            deviationConfirmed: false
+        };
+
+        this.setCountDisplay(
+            'countEmployeeDisplay',
+            'Mitarbeiter',
+            BergInventurModern.session.employeeName
+        );
+        this.setCountDisplay(
+            'countStandortDisplay',
+            'Standort',
+            BergInventurModern.session.standort
+        );
+        this.setCountDisplay('countBinDisplay', 'Lagerfach', this.countState.fachnummer);
+        this.setCountDisplay(
+            'countManufacturerDisplay',
+            'Hersteller-Art.-Nr.',
+            this.countState.art_herst_art_nr
+        );
+        this.setCountDisplay(
+            'countDescriptionDisplay',
+            'Artikelbezeichnung',
+            this.countState.art_text1
+        );
+
+        countField.setValue('');
+        this.hideCountStatus();
+        this.lookupReference('searchContent').setHidden(true);
+        countView.setHidden(false);
+
+        Ext.defer(function() {
+            if (!countField.destroyed && !countView.getHidden()) {
+                countField.focus();
+            }
+        }, 100);
+    },
+
+    onCountValueChange: function() {
+        if (this.countState) {
+            this.countState.readyToSave = false;
+            this.countState.deviationConfirmed = false;
+        }
+
+        this.hideCountStatus();
+    },
+
+    onCountCheck: function() {
+        var countField = this.lookupReference('countField'),
+            rawValue = this.getRawCountValue(countField),
+            me = this;
+
+        if (!this.countState) {
+            return;
+        }
+
+        this.countState.readyToSave = false;
+        this.countState.deviationConfirmed = false;
+        this.hideCountStatus();
+
+        if (rawValue === '') {
+            Ext.Msg.alert('Fehler', 'gezählt darf nicht leer sein', function() {
+                countField.focus();
+            });
+            return;
+        }
+
+        this.countState.gezaehlt = rawValue;
+
+        if (Number(rawValue) != Number(this.countState.menge_im_fach)) {
+            Ext.Msg.show({
+                title: 'Abweichungen in der Menge ',
+                message: Ext.String.htmlEncode(
+                    String(BergInventurModern.session.employeeName || '')
+                ) + ', ' +
+                    'das Ergebnis stimmt nicht mit dem Bestand der NAV überein.' +
+                    'Möchten Sie trotzdem den gezählten Bestand speichern?',
+                width: 300,
+                buttons: [
+                    {
+                        itemId: 'yes',
+                        text: 'Ja'
+                    },
+                    {
+                        itemId: 'no',
+                        text: 'noch einmal zählen',
+                        ui: 'action'
+                    }
+                ],
+                fn: function(buttonId) {
+                    if (buttonId === 'yes') {
+                        me.markCountReady(true);
+                    } else {
+                        countField.focus();
+                    }
+                }
+            });
+            return;
+        }
+
+        this.markCountReady(false);
+    },
+
+    onCountBack: function() {
+        var countField = this.lookupReference('countField');
+
+        countField.setValue('');
+        this.countState = null;
+        this.hideCountStatus();
+        this.lookupReference('countView').setHidden(true);
+        this.lookupReference('searchContent').setHidden(false);
+    },
+
+    markCountReady: function(deviationConfirmed) {
+        this.countState.readyToSave = true;
+        this.countState.deviationConfirmed = deviationConfirmed;
+        this.showCountStatus(
+            'Zählung geprüft – Speichern in Phase 2C Teil 2 noch deaktiviert.'
+        );
+    },
+
+    getRawCountValue: function(countField) {
+        return countField.getComponent().getValue();
+    },
+
+    setCountDisplay: function(reference, label, value) {
+        this.lookupReference(reference).setHtml(
+            '<strong>' + label + ':</strong> ' +
+            Ext.String.htmlEncode(String(value === null || value === undefined ? '' : value))
+        );
+    },
+
+    showCountStatus: function(message) {
+        var display = this.lookupReference('countStatusDisplay');
+
+        display.setHtml(Ext.String.htmlEncode(message));
+        display.setHidden(false);
+    },
+
+    hideCountStatus: function() {
+        var display = this.lookupReference('countStatusDisplay');
+
+        if (display) {
+            display.setHtml('');
+            display.setHidden(true);
+        }
     },
 
     showSelectedResult: function(record) {

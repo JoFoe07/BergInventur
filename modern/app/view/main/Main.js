@@ -4,6 +4,7 @@ Ext.define('BergInventurModern.view.main.Main', {
 
     requires: [
         'BergInventurModern.view.main.MainController',
+        'BergInventurModern.view.count.Count',
         'Ext.Button',
         'Ext.Component',
         'Ext.dataview.DataView',
@@ -27,6 +28,7 @@ Ext.define('BergInventurModern.view.main.Main', {
         },
         {
             xtype: 'container',
+            reference: 'searchContent',
             cls: 'bi-search-content',
             flex: 1,
             padding: 12,
@@ -129,6 +131,12 @@ Ext.define('BergInventurModern.view.main.Main', {
                     }
                 }
             ]
+        },
+        {
+            xtype: 'inventory-count',
+            reference: 'countView',
+            flex: 1,
+            hidden: true
         }
     ],
 
