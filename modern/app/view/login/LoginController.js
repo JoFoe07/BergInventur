@@ -60,6 +60,9 @@ Ext.define('BergInventurModern.view.login.LoginController', {
         this.hideError();
         scanField.setDisabled(true);
         this.employeeStore.removeAll();
+        this.employeeStore.getProxy().setUrl(
+            BergInventurModern.getServiceUrl('get_WhseEmployeeLogistic.php')
+        );
         this.employeeStore.load({
             params: {
                 action: 'Liste',

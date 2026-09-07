@@ -28,7 +28,6 @@ Ext.define('BergInventurModern.model.Employee', {
 
     proxy: {
         type: 'ajax',
-        url: BergInventurModern.getServiceUrl('get_WhseEmployeeLogistic.php'),
         actionMethods: {
             read: 'GET'
         },
