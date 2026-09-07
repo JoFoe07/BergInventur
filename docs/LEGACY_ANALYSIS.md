@@ -832,3 +832,32 @@ Die einzige durch Codex angelegte/bearbeitete Datei ist `docs/LEGACY_ANALYSIS.md
 Es wurde keine App-/Buildversion erhöht. Kein Commit, kein Push, kein Branchwechsel und kein Deployment. Empfohlener Committext für einen **erst später ausdrücklich beauftragten** Dokumentationscommit: `docs: document Phase 0 BergInventur legacy analysis`.
 
 Phase 0 endet mit dieser Dokumentation. Phase 1 wurde nicht begonnen.
+
+# 26. Produktiver Backendstand als Grundlage für Phase 2B
+
+Für Phase 2B wurde als direkt auf `beg-web` verifizierte Laufzeitgrundlage
+vorgegeben:
+
+- aktive Legacy-Anwendung: `https://beg-web.berg-sdl.de/BergInventur/`
+- Inventur-Servicebasis: `/BergInventur/resources/services`
+- produktive Datei:
+  `C:\amp\Apache24\htdocs\BergInventur\resources\services\get_artikelnummern.php`
+
+Diese produktive Datei weicht von der älteren Git-Datei ab. Im produktiven
+Artikel-/EAN-Zweig steht das `break` außerhalb der Trefferbedingung. Deshalb
+endet `action=ListeArtikelnummern` auch bei null Treffern ohne Fallthrough in
+`case "create"`.
+
+Außerdem verwendet der produktive Stand folgende lagerplatzbezogene
+Bedingungen:
+
+- Der Join vorhandener Inventurwerte verknüpft Katalogartikelnummer, `ze` und
+  Lagerplatz.
+- Die Prüfung auf eine vorhandene offene Zählung verwendet
+  Katalogartikelnummer, Lagerort, Lagerplatz und `status <> 'gebucht'`.
+- Das zugehörige UPDATE ist auf dieselben vier Kriterien begrenzt.
+
+Für das tatsächliche Laufzeitverhalten ist dieser produktive Stand maßgeblich.
+Phase 2B verwendet ausschließlich den GET-Leseweg. Eine Synchronisierung oder
+Änderung der produktiven beziehungsweise versionierten PHP-Datei ist nicht
+Teil dieser Phase.

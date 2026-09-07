@@ -80,3 +80,94 @@
     font-size: 18px;
     font-weight: 500;
 }
+
+.bi-inventory-search {
+    background: #f5f5f5;
+}
+
+.bi-search-content {
+    width: 100%;
+    max-width: 520px;
+    margin: 0 auto;
+}
+
+.bi-search-session {
+    margin-bottom: 8px;
+    padding: 8px 10px;
+    background: #fff;
+    font-size: 13px;
+}
+
+.bi-search-session-value {
+    margin-bottom: 4px;
+    overflow-wrap: break-word;
+}
+
+.bi-search-version {
+    color: #555;
+    font-size: 12px;
+}
+
+.bi-search-mode,
+.bi-search-field {
+    width: 100%;
+    margin-bottom: 8px;
+}
+
+.bi-search-field .x-input-el {
+    min-height: 52px;
+}
+
+.bi-search-button {
+    width: 100%;
+    min-height: 52px;
+    margin-bottom: 8px;
+}
+
+.bi-search-message {
+    margin-bottom: 8px;
+    padding: 10px;
+    border: 1px solid #b71c1c;
+    color: #b71c1c;
+    background: #ffebee;
+}
+
+.bi-search-results {
+    width: 100%;
+    min-height: 120px;
+}
+
+.bi-search-result-card {
+    min-height: 72px;
+    padding: 12px;
+    border-bottom: 1px solid #ddd;
+    background: #fff;
+}
+
+.bi-search-result-row,
+.bi-search-result-text,
+.bi-search-result-info {
+    margin-bottom: 4px;
+    overflow-wrap: break-word;
+}
+
+.bi-search-result-info {
+    color: #0c00ff;
+}
+
+.bi-search-selection {
+    margin-bottom: 8px;
+    padding: 12px;
+    background: #fff;
+}
+
+.bi-search-selection-row {
+    margin-bottom: 6px;
+    overflow-wrap: break-word;
+}
+
+.bi-search-selection-status {
+    margin: 12px 0 4px;
+    font-size: 17px;
+    font-weight: 500;
+}

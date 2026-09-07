@@ -1,9 +1,10 @@
 Ext.namespace('BergInventurModern');
 
-BergInventurModern.version = '1.0.1.0';
-BergInventurModern.build = 'Phase 2A';
+BergInventurModern.version = '1.0.2.0';
+BergInventurModern.build = 'Phase 2B';
 BergInventurModern.config = {
-    serviceBaseUrl: '/LagerTool/resources/services'
+    loginServiceBaseUrl: '/LagerTool/resources/services',
+    inventoryServiceBaseUrl: '/BergInventur/resources/services'
 };
 BergInventurModern.session = {
     scanValue: null,
@@ -11,8 +12,8 @@ BergInventurModern.session = {
     employeeName: null,
     standort: null
 };
-BergInventurModern.getServiceUrl = function(path) {
-    return BergInventurModern.config.serviceBaseUrl.replace(/\/$/, '') + '/' + String(path || '').replace(/^\//, '');
+BergInventurModern.getServiceUrl = function(baseUrl, path) {
+    return String(baseUrl || '').replace(/\/$/, '') + '/' + String(path || '').replace(/^\//, '');
 };
 
 Ext.application({
