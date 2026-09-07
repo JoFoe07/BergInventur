@@ -236,3 +236,69 @@ Nach jeder Implementierung einen kurzen Bericht liefern:
 
 Codex führt Commit und Push nur aus, wenn dies ausdrücklich
 angefordert wurde.
+
+
+## Entwicklungs-, Build- und Testumgebung
+
+### Führende Entwicklungsumgebung
+
+Die führende Quellcode- und Git-Arbeitsumgebung ist der Mac:
+
+`~/Documents/Entwicklung/InventurApp/BergInventur`
+
+Codex arbeitet ausschließlich in diesem Repository.
+
+### beg-web
+
+Der Windows-Server `beg-web` dient als Build- und Testumgebung.
+
+Git-Checkout:
+
+`C:\dev\InventurApp_BuildRepo\BergInventur`
+
+Dort stehen zur Verfügung:
+
+- Sencha Cmd 7.6.0.87
+- Ext JS 6.2.1.167
+- bestehende Buildumgebung des LagerTools
+
+Auf `beg-web` wird grundsätzlich nicht entwickelt.
+
+Keine dauerhaften manuellen Änderungen an Quelldateien auf `beg-web`.
+
+### Synchronisation
+
+Quellcode wird nicht manuell zwischen Mac und beg-web kopiert.
+
+Der vorgesehene Weg ist:
+
+1. Änderung auf dem Mac
+2. `git status`
+3. `git diff`
+4. lokale Prüfung soweit möglich
+5. Commit nach Freigabe
+6. Push nach GitHub
+7. auf beg-web `git pull`
+8. Sencha-Build auf beg-web
+9. Deployment ausschließlich in die Buildtest-Umgebung
+10. Test auf TC26/TC27
+
+Fehler aus dem Build oder Gerätetest werden anschließend im
+Mac-Repository korrigiert.
+
+### Buildtest
+
+Für BergInventur ist eine separate Buildtest-Umgebung zu verwenden.
+
+Produktive Inventur-Dateien dürfen während Entwicklung und Migration
+nicht überschrieben werden.
+
+Vor einem produktiven Deployment ist eine ausdrückliche Freigabe
+erforderlich.
+
+### Nachvollziehbarkeit
+
+Jeder auf TC26/TC27 getestete Build muss einem eindeutigen Git-Commit
+und einer App-/Buildversion zugeordnet werden können.
+
+
