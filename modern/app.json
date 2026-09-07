@@ -1,7 +1,7 @@
 {
     "name": "BergInventurModern",
     "namespace": "BergInventurModern",
-    "version": "1.0.0.0",
+    "version": "1.0.1.0",
     "framework": "ext",
     "toolkit": "modern",
     "theme": "theme-material",
@@ -27,7 +27,12 @@
             "sass/src"
         ]
     },
-    "resources": [],
+    "resources": [
+        {
+            "path": "resources",
+            "output": "resources"
+        }
+    ],
     "js": [
         {
             "path": "app.js",
