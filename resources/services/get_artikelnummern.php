@@ -6,11 +6,10 @@
 session_start();
 setlocale(LC_MONETARY, 'de_DE');
 include("dbconnection_nav.inc.php");
+
 function umlaute($string) { 
    return str_replace ( array ( '{', '}', "|", '[', ']', '\\', '~' ), array ( 'ä' , 'ü', 'ö' , 'Ä' , 'Ü', 'Ö' , 'ß'), $string );
 };
-
-
 
 function mssql_escape($data) {
     if(is_numeric($data))
@@ -18,7 +17,6 @@ function mssql_escape($data) {
     $unpacked = unpack('H*hex', $data);
     return '0x' . $unpacked['hex'];
 }
-
 
 function hochkomma($string) { 
    return str_replace ( array ( "'" ), array ( "`"), $string );
@@ -31,9 +29,8 @@ function jf_mssql_escape_string($daten) {
 	foreach ( $non_displayables as $regex )
 		$daten = preg_replace( $regex, '', $daten );
 	$daten = str_replace("'", "''", $daten );
-return $daten;
+	return $daten;
 };
-
 
 $current_page = 1;
 $offset_page = 0;
@@ -43,13 +40,10 @@ $limit_per_page = 10;
 
 $artikelsuche = $_REQUEST["artikelsuche"];										  
 
-
 switch($_REQUEST["action"]) {
+
  case "ListeArtikelnummern":
 
-
- 
-//if (!isset($_REQUEST["action"])) {
 	$result = array("artikel"=>array(),"total"=>0);
 		
 	$current_page = $_REQUEST["page"];
@@ -66,25 +60,22 @@ switch($_REQUEST["action"]) {
 	// Lagerbestand suchen 	
 	if ($artikelsuche == 'false') {						 
 							   
-
-	$sql = 		" select [lb].[katalogartikelnr] as KANR,[lb].[artikelnr],[lb].[ze] as zustaendikeit,[lb].[Location Code],[lb].[Lagerplatz] as LGP,[ME_Hauptlager],[ME_WE],[Menge_verfuegbar],  \n"
-			. " [NAV_PROD].[dbo].[BAT".'$'."Warehouse Activity Line].[Activity Type] as Activity,  format(NAV_PROD.dbo.[BAT".'$'."Warehouse Activity Line].[Due Date],'d', 'de-de')  as gew_lieferdatum, \n"
-			. "	[Base Unit of Measure],[Vendor No_],[Vendor Item No_],[lb].[Description],[Unit Price],[Item Category Code],  \n"
-			. "	[Following Item Mfr_ Code],[Following Mfr_ Item No_],[Planning Group],[Blocked Purchase],  \n"
-			. "	[Expire Mark],[Warengruppe],[Rabattklasse],[Hersteller],[id],  \n"
-			. "	[lagerplatz],[art_herst_art_nr],[art_text1],[menge_im_fach],  \n"
-			. "	[gezaehlt],[zaehler],[ivt].[ze],[lagerort],[gezaehlt_am],  \n"
-			. "	case when [ivt].[katalogartikelnr] is null then '' else gezaehlt +' ' + [ivt].status +' am '+ CONVERT(VARCHAR(14), gezaehlt_am, 104)  END as info  \n"
-			. " FROM  dbo.Lagerbestand AS lb WITH (NOLOCK) LEFT OUTER JOIN \n"
-            . "	dbo.jf_inventur_lagerfach AS ivt WITH (NOLOCK) ON ivt.katalogartikelnr = lb.katalogartikelnr AND ivt.ze = lb.ze FULL OUTER JOIN  \n"
-            . "	[NAV_PROD].[dbo].[BAT".'$'."Warehouse Activity Line] ON lb.Lagerplatz = [NAV_PROD].[dbo].[BAT".'$'."Warehouse Activity Line].[Bin Code] \n"
-			. " and lb.ze = SUBSTRING([NAV_PROD].[dbo].[BAT".'$'."Warehouse Activity Line].[Location Code],1,2) \n"
-			. "   where  \n"
-			. "   [lb].[ME_Hauptlager] > 0 and  \n"
-			. "   [lb].[ze] = '".$standort."' and  \n"
-		//				. "   [lb].[ze] = '40' and  \n"
-			. "   [lb].[Lagerplatz] like '".$keyword."%' order by [lb].[Lagerplatz]  ";		
-		//	. "   REPLACE(UPPER([lb].[Lagerplatz]),'-','') like REPLACE(upper('".$keyword."%'),'-','') ";
+		$sql = 		" select [lb].[katalogartikelnr] as KANR,[lb].[artikelnr],[lb].[ze] as zustaendikeit,[lb].[Location Code],[lb].[Lagerplatz] as LGP,[ME_Hauptlager],[ME_WE],[Menge_verfuegbar],  \n"
+				. " [NAV_PROD].[dbo].[BAT".'$'."Warehouse Activity Line].[Activity Type] as Activity,  format(NAV_PROD.dbo.[BAT".'$'."Warehouse Activity Line].[Due Date],'d', 'de-de')  as gew_lieferdatum, \n"
+				. "	[Base Unit of Measure],[Vendor No_],[Vendor Item No_],[lb].[Description],[Unit Price],[Item Category Code],  \n"
+				. "	[Following Item Mfr_ Code],[Following Mfr_ Item No_],[Planning Group],[Blocked Purchase],  \n"
+				. "	[Expire Mark],[Warengruppe],[Rabattklasse],[Hersteller],[id],  \n"
+				. "	[lagerplatz],[art_herst_art_nr],[art_text1],[menge_im_fach],  \n"
+				. "	[gezaehlt],[zaehler],[ivt].[ze],[lagerort],[gezaehlt_am],  \n"
+				. "	case when [ivt].[katalogartikelnr] is null then '' else gezaehlt +' ' + [ivt].status +' am '+ CONVERT(VARCHAR(14), gezaehlt_am, 104)  END as info  \n"
+				. " FROM  dbo.Lagerbestand AS lb WITH (NOLOCK) LEFT OUTER JOIN \n"
+				. " dbo.jf_inventur_lagerfach AS ivt WITH (NOLOCK) ON ivt.katalogartikelnr = lb.katalogartikelnr AND ivt.ze = lb.ze AND ivt.lagerplatz = lb.Lagerplatz FULL OUTER JOIN  \n"
+				. "	[NAV_PROD].[dbo].[BAT".'$'."Warehouse Activity Line] ON lb.Lagerplatz = [NAV_PROD].[dbo].[BAT".'$'."Warehouse Activity Line].[Bin Code] \n"
+				. " and lb.ze = SUBSTRING([NAV_PROD].[dbo].[BAT".'$'."Warehouse Activity Line].[Location Code],1,2) \n"
+				. "   where  \n"
+				. "   [lb].[ME_Hauptlager] > 0 and  \n"
+				. "   [lb].[ze] = '".$standort."' and  \n"
+				. "   [lb].[Lagerplatz] like '".$keyword."%' order by [lb].[Lagerplatz]  ";		
 
 		$params = array();
 		$options =  array( "Scrollable" => SQLSRV_CURSOR_KEYSET );
@@ -94,21 +85,14 @@ switch($_REQUEST["action"]) {
 		if($dbresult === false) {
 			die(print_r(sqlsrv_errors(), true));
 		}
-		#Fetching Data by array
 
 		$menge = sqlsrv_num_rows( $dbresult);
 		$result["total"] = $menge;
 
-/*
-if ($row_count === false)
-   echo "Error in retrieveing row count.<br><br>";
-else
-   echo "$row_count <br>";
-*/
-	if (sqlsrv_num_rows ($dbresult) > 0) {
-		while($row = sqlsrv_fetch_array($dbresult))
-		{
-		array_push($result["artikel"],array(
+		if (sqlsrv_num_rows ($dbresult) > 0) {
+			while($row = sqlsrv_fetch_array($dbresult))
+			{
+				array_push($result["artikel"],array(
 					"fachnummer"=>$row['LGP'],
 					"art_herst_art_nr"=>utf8_encode(addslashes((string)$row['Vendor Item No_'])),
 					"art_text1"=>utf8_encode((string)$row['Description']),
@@ -123,28 +107,23 @@ else
 					"me_we"=>$row['ME_WE'],
 					"Activity_Type"=>$row['Activity'],
 					"gew_lieferdatum"=>$row['gew_lieferdatum'],
-
-			
-					));
-			
+				));
+			}
 		}
 
-}
-//	pg_close($verbindung);
-break;
-}
-else //// Lagerfach suchen 	
-{	
-	
-	$standort = $standort.'01';
-	$sql = 		"	select  NSI.[Item No_],   \n"
-				. " [tools].[dbo].[get ME_verfuegbar_filiale](NSI.[Item No_],'".$standort."') 'Menge in Filiale',WAL.[Bin Code] lagerplatz,   \n"
-				. " NSI.Description,NSI.[Manufacturer Item No_],NSI.[Manufacturer Code],[Bar Code] from NAV_PROD.dbo.[BAT".'$'."Nonstock Item] NSI WITH (NOLOCK)   \n"
-				. " inner join [NAV_PROD].[dbo].[BAT".'$'."Warehouse Entry] WAL WITH (NOLOCK)   \n"
-				. " on NSI.[Item No_] = WAL.[Item No_]   \n"
-				. " where WAL.[Location Code] = '".$standort."' and ((REPLACE(UPPER(NSI.[Manufacturer Item No_]),' ','')) like REPLACE(upper('".$keyword."%'),' ','') or NSI.[Bar Code] like '".$keyword."' ) and WAL.[Bin Code] <>'WE'  \n"
-				. " group by WAL.[Bin Code],NSI.[Item No_],NSI.Description,NSI.[Manufacturer Item No_],NSI.[Manufacturer Code],[Bar Code]   ";
-	
+		break;
+	}
+	else //// Lagerfach suchen 	
+	{	
+		$standort = $standort.'01';
+		$sql = 		"	select  NSI.[Item No_],   \n"
+					. " [tools].[dbo].[get ME_verfuegbar_filiale](NSI.[Item No_],'".$standort."') 'Menge in Filiale',WAL.[Bin Code] lagerplatz,   \n"
+					. " NSI.Description,NSI.[Manufacturer Item No_],NSI.[Manufacturer Code],[Bar Code] from NAV_PROD.dbo.[BAT".'$'."Nonstock Item] NSI WITH (NOLOCK)   \n"
+					. " inner join [NAV_PROD].[dbo].[BAT".'$'."Warehouse Entry] WAL WITH (NOLOCK)   \n"
+					. " on NSI.[Item No_] = WAL.[Item No_]   \n"
+					. " where WAL.[Location Code] = '".$standort."' and ((REPLACE(UPPER(NSI.[Manufacturer Item No_]),' ','')) like REPLACE(upper('".$keyword."%'),' ','') or NSI.[Bar Code] like '".$keyword."' ) and WAL.[Bin Code] <>'WE'  \n"
+					. " group by WAL.[Bin Code],NSI.[Item No_],NSI.Description,NSI.[Manufacturer Item No_],NSI.[Manufacturer Code],[Bar Code]   ";
+		
 		$params = array();
 		$options =  array( "Scrollable" => SQLSRV_CURSOR_KEYSET );
 
@@ -152,16 +131,15 @@ else //// Lagerfach suchen
 
 		if($dbresult === false) {
 			die(print_r(sqlsrv_errors(), true));
-			//die(print_r($sql, true));
 		}
-		#Fetching Data by array
 
 		$menge = sqlsrv_num_rows( $dbresult);
 		$result["total"] = $menge;
+
 		if (sqlsrv_num_rows ($dbresult) > 0) {
-		while($row = sqlsrv_fetch_array($dbresult))
-		{
-		array_push($result["artikel"],array(
+			while($row = sqlsrv_fetch_array($dbresult))
+			{
+				array_push($result["artikel"],array(
 					"fachnummer"=>$row['lagerplatz'],
 					"art_herst_art_nr"=>utf8_encode(addslashes((string)$row['Manufacturer Item No_'])),
 					"art_text1"=>utf8_encode((string)$row['Description']),
@@ -176,65 +154,70 @@ else //// Lagerfach suchen
 					"me_we"=>$row['ME_WE'],
 					"Activity_Type"=>$row['Activity'],
 					"gew_lieferdatum"=>$row['gew_lieferdatum'],
-
-			
-					));
-			
-		}/* */
-break;
-}
-}
-
+				));
+			}
+		}
+		break;
+	}
 
  case "create":
 
- //get the data
-$json = file_get_contents("php://input");
-$data = json_decode($json, true);
+	//get the data
+	$json = file_get_contents("php://input");
+	$data = json_decode($json, true);
 
-//output the array in the response of the curl request
-//(print_r($data);
+	// Prüfen ob der Artikel bereits erfasst wurde, aber noch nicht in NAV gebucht wurde.
+	// FIX: lagerplatz (fachnummer) muss Teil der Eindeutigkeit sein.
+	$sql =  "select katalogartikelnr
+	         from tools.[dbo].[jf_inventur_lagerfach] IV
+	         where IV.katalogartikelnr = '".$data["carlanr"]."'
+	           and IV.lagerort         = '".$data["lagerort"]."'
+	           and IV.lagerplatz       = '".$data["fachnummer"]."'
+	           and IV.status <> 'gebucht' ";
 
-//$artikeltext1 = hochkomma($data["art_text1"]);
-//$artikeltext1 = mssql_escape($data["art_text1"]);
-//$data1 = jf_mssql_escape_string($data["art_text1"]);
-//einfache Hochkomma escapen
-
-
-//'ä ü ö Ä Ü Ö ß'
-
-// Prüfen ob der Artikel bereits erfasst wurde, aber noch nicht in NAV gebucht wurde.
-
-
-$sql =  "select katalogartikelnr from tools.[dbo].[jf_inventur_lagerfach] IV where IV.katalogartikelnr='".$data["carlanr"]."' and IV.lagerort = '".$data["lagerort"]."' and IV.status<>'gebucht' ";
-$params = array();
-$options =  array( "Scrollable" => SQLSRV_CURSOR_KEYSET );
-$dbresult = sqlsrv_query($conn, $sql , $params, $options );
-
-if (sqlsrv_num_rows ($dbresult) >= 1) // bereits gezählt aber noch nicht gebucht dann ändern
-{
-	
-	$query = "update tools.[dbo].[jf_inventur_lagerfach]  set zaehler= '".$data["zaehler"]."' ,gezaehlt= ".$data["gezaehlt"]." , status='".utf8_decode('geändert')."',gezaehlt_am='". date('d-m-Y H:i:s')."' where katalogartikelnr='".$data["carlanr"]."' and lagerort = '".$data["lagerort"]."' and status<> 'gebucht'";
-//print_r($query);
 	$params = array();
 	$options =  array( "Scrollable" => SQLSRV_CURSOR_KEYSET );
-	$ergebnis = sqlsrv_query( $conn, $query, $params, $options );
+	$dbresult = sqlsrv_query($conn, $sql , $params, $options );
 
-}
-else
-{
+	if (sqlsrv_num_rows ($dbresult) >= 1) // bereits gezählt aber noch nicht gebucht dann ändern
+	{
+		// FIX: UPDATE ebenfalls mit lagerplatz absichern
+		$query = "update tools.[dbo].[jf_inventur_lagerfach]
+		          set zaehler     = '".$data["zaehler"]."' ,
+		              gezaehlt    = ".$data["gezaehlt"]." ,
+		              status      = '".utf8_decode('geändert')."' ,
+		              gezaehlt_am = '". date('d-m-Y H:i:s')."'
+		          where katalogartikelnr = '".$data["carlanr"]."'
+		            and lagerort         = '".$data["lagerort"]."'
+		            and lagerplatz       = '".$data["fachnummer"]."'
+		            and status <> 'gebucht'";
 
-	$query = "INSERT INTO jf_inventur_lagerfach (katalogartikelnr, lagerplatz, art_herst_art_nr, art_text1, menge_im_fach, gezaehlt, gezaehlt_am,zaehler,lagerort,ze,me_we,status) values (?,?,?,?,?,?,?,?,?,?,?,?)";
-			
-	$params = array($data["carlanr"],$data["fachnummer"],$data["art_herst_art_nr"],utf8_decode($data["art_text1"]),$data["menge_im_fach"],$data["gezaehlt"],date('d-m-Y H:i:s'),utf8_decode($data["zaehler"]),$data["lagerort"],$data["ze"],$data["me_we"],utf8_decode('gezählt'));
-	$options =  array( "Scrollable" => SQLSRV_CURSOR_KEYSET );
-	$ergebnis = sqlsrv_query( $conn, $query, $params, $options );
+		$params = array();
+		$options =  array( "Scrollable" => SQLSRV_CURSOR_KEYSET );
+		$ergebnis = sqlsrv_query( $conn, $query, $params, $options );
+	}
+	else
+	{
+		$query = "INSERT INTO jf_inventur_lagerfach (katalogartikelnr, lagerplatz, art_herst_art_nr, art_text1, menge_im_fach, gezaehlt, gezaehlt_am,zaehler,lagerort,ze,me_we,status) values (?,?,?,?,?,?,?,?,?,?,?,?)";
+				
+		$params = array(
+			$data["carlanr"],
+			$data["fachnummer"],
+			$data["art_herst_art_nr"],
+			utf8_decode($data["art_text1"]),
+			$data["menge_im_fach"],
+			$data["gezaehlt"],
+			date('d-m-Y H:i:s'),
+			utf8_decode($data["zaehler"]),
+			$data["lagerort"],
+			$data["ze"],
+			$data["me_we"],
+			utf8_decode('gezählt')
+		);
 
-
-
-};
-
-
+		$options =  array( "Scrollable" => SQLSRV_CURSOR_KEYSET );
+		$ergebnis = sqlsrv_query( $conn, $query, $params, $options );
+	};
 
 	$int = sqlsrv_num_rows($ergebnis);
 
@@ -244,35 +227,19 @@ else
 	}
 	else
 	{
-		$result = array("success"=>false,"message"=>"Fehler" );//sqlsrv_errors());//$query);//;
+		$result = array("success"=>false,"message"=>"Fehler" );
 	} ;
-/**/
-/*
-if( $ergebnis === false ) {
-	$result = array("success"=>false,"message"=>"Fehler" ); 
-    // die( print_r( sqlsrv_errors(), true));
-}
-else
-{
 
-		$result = array("success"=>true,"message"=>$ergebnis);//"Datensatz hinzugefügt");
-};	
-*/
 	break;
 
-	
  case "update":
 
-//echo preg_replace('/\s\s+/','',$inputPayload->geaendert_am);
-//echo date('Y-m-dH:i:s', (1371454040))
-/*  	print_r($query);  */
-		
 	$dbresult = mysql_query($query);
 
 	if(pg_num_rows()>0)
-		$result = array("success"=>true,"message"=>"Updated");//$query);
+		$result = array("success"=>true,"message"=>"Updated");
 	else
-		$result = array("success"=>false,"message"=>mysql_error());//$query);//;
+		$result = array("success"=>false,"message"=>mysql_error());
 
 	pg_close($verbindung);
 	
@@ -290,6 +257,5 @@ if (isset($_REQUEST["callback"])) {
 else {
 	header('Cache-Control: no-cache, must-revalidate');
 	header("Content-Type: application/x-json");
-
 	echo json_encode($result);
-	}
+}

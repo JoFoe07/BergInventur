@@ -861,3 +861,27 @@ Für das tatsächliche Laufzeitverhalten ist dieser produktive Stand maßgeblich
 Phase 2B verwendet ausschließlich den GET-Leseweg. Eine Synchronisierung oder
 Änderung der produktiven beziehungsweise versionierten PHP-Datei ist nicht
 Teil dieser Phase.
+
+# 27. Synchronisierung des aktuellen produktiven Backendstands
+
+Am 07.09.2026 wurde der zu diesem Zeitpunkt aktuelle produktive Stand von
+`C:\amp\Apache24\htdocs\BergInventur\resources\services\get_artikelnummern.php`
+vollständig mit der versionierten Datei abgeglichen. Die produktive Datei wurde
+nach einem vollständigen Diff unverändert als neue Git-Basis übernommen. Diese
+Aussage beschreibt den aktuellen produktiven Stand; sie ist keine Aussage über
+die historische Semantik früherer Versionen.
+
+Der übernommene Stand enthält folgende fachlich relevante Korrekturen:
+
+- Der Artikel-/EAN-Zweig von `ListeArtikelnummern` endet unabhängig von der
+  Trefferzahl mit `break`. Ein Nulltreffer fällt daher nicht in `case "create"`.
+- Vorhandene Inventurwerte werden zusätzlich über den Lagerplatz zugeordnet:
+  Katalogartikelnummer, `ze` und Lagerplatz müssen übereinstimmen.
+- Die Prüfung auf eine vorhandene offene Inventurzeile berücksichtigt
+  Katalogartikelnummer, Lagerort, Lagerplatz und `status <> 'gebucht'`.
+- Das zugehörige UPDATE verwendet dieselben vier Kriterien. Der Lagerplatz ist
+  damit Teil der UPDATE-Eindeutigkeit des aktuellen produktiven Stands.
+
+Die Synchronisierung änderte weder Datenbankstrukturen noch andere Endpunkte.
+Es wurde keine zusätzliche Backendlogik ergänzt und kein produktives Deployment
+durchgeführt.
