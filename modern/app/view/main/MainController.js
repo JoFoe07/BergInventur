@@ -4,7 +4,8 @@ Ext.define('BergInventurModern.view.main.MainController', {
 
     requires: [
         'BergInventurModern.store.InventoryItems',
-        'Ext.MessageBox'
+        'Ext.MessageBox',
+        'Ext.Toolbar'
     ],
 
     init: function() {
