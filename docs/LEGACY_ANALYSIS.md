@@ -919,3 +919,21 @@ entfernt. Der vorgelagerte SELECT verwendet den KEYSET-Cursor für
 Die Prüfung über `sqlsrv_rows_affected()`, die fachliche
 INSERT-/UPDATE-Entscheidung sowie SQL-, Request- und Responsevertrag bleiben
 unverändert.
+
+# 30. Modern-Anzeige des UTC-Zählzeitpunkts
+
+Am 08.09.2026 wurden sowohl der UPDATE- als auch der INSERT-Pfad der
+Modern-App real und erfolgreich gegen den produktiven Backendstand getestet.
+Die jeweiligen Datenbankänderungen und die Rückgabe `success: true` wurden
+bestätigt.
+
+`gezaehlt_am` bleibt unverändert als UTC-Rohwert in der Datenbank bestehen.
+Die vorhandene Windows-Auswertung interpretiert diesen Wert mit
+`tools.dbo.UTC2MEZ(i.gezaehlt_am)` als UTC und rechnet ihn für die fachliche
+Anzeige nach deutscher Lokalzeit um. Die Modern-App folgt dieser Semantik für
+die Anzeige: Sie interpretiert die SQLSRV-DateTime-Struktur ausdrücklich als
+UTC, rechnet standardkonform nach `Europe/Berlin` um und zeigt Datum und
+Uhrzeit im Format `dd.MM.yyyy HH:mm` an.
+
+Backend, Datenbank, gespeicherte historische Werte sowie Request- und
+Responsevertrag bleiben unverändert.

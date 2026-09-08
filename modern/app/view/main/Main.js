@@ -2,6 +2,122 @@ Ext.define('BergInventurModern.view.main.Main', {
     extend: 'Ext.Container',
     xtype: 'app-main',
 
+    statics: {
+        berlinDateTimeFormatter: null,
+
+        formatInventoryInfo: function(values) {
+            var timestamp,
+                info,
+                match,
+                year,
+                month,
+                day,
+                hour,
+                minute,
+                second,
+                millisecond,
+                parsed,
+                formatter,
+                dateParts,
+                formattedParts,
+                index,
+                part;
+
+            values = values || {};
+            timestamp = values.gezaehlt_am;
+            info = values.info !== null && values.info !== undefined ?
+                String(values.info) : '';
+
+            if (!info) {
+                return '';
+            }
+
+            if (!timestamp || typeof timestamp !== 'object' ||
+                    String(timestamp.timezone || '').toUpperCase() !== 'UTC' ||
+                    typeof timestamp.date !== 'string') {
+                return Ext.String.htmlEncode(info);
+            }
+
+            match = timestamp.date.match(
+                /^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2}):(\d{2})(?:\.(\d{1,6}))?$/
+            );
+
+            if (!match) {
+                return Ext.String.htmlEncode(info);
+            }
+
+            year = Number(match[1]);
+            month = Number(match[2]);
+            day = Number(match[3]);
+            hour = Number(match[4]);
+            minute = Number(match[5]);
+            second = Number(match[6]);
+            millisecond = Number(((match[7] || '') + '000').substring(0, 3));
+            parsed = new Date(Date.UTC(
+                year,
+                month - 1,
+                day,
+                hour,
+                minute,
+                second,
+                millisecond
+            ));
+
+            if (isNaN(parsed.getTime()) ||
+                    parsed.getUTCFullYear() !== year ||
+                    parsed.getUTCMonth() !== month - 1 ||
+                    parsed.getUTCDate() !== day ||
+                    parsed.getUTCHours() !== hour ||
+                    parsed.getUTCMinutes() !== minute ||
+                    parsed.getUTCSeconds() !== second) {
+                return Ext.String.htmlEncode(info);
+            }
+
+            try {
+                if (typeof Intl === 'undefined' || !Intl.DateTimeFormat) {
+                    return Ext.String.htmlEncode(info);
+                }
+
+                formatter = this.berlinDateTimeFormatter;
+
+                if (!formatter) {
+                    formatter = this.berlinDateTimeFormatter = new Intl.DateTimeFormat(
+                        'en-GB-u-ca-gregory-nu-latn',
+                        {
+                            timeZone: 'Europe/Berlin',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            hour12: false
+                        }
+                    );
+                }
+
+                if (typeof formatter.formatToParts !== 'function') {
+                    return Ext.String.htmlEncode(info);
+                }
+
+                dateParts = formatter.formatToParts(parsed);
+                formattedParts = {};
+
+                for (index = 0; index < dateParts.length; index += 1) {
+                    part = dateParts[index];
+                    formattedParts[part.type] = part.value;
+                }
+
+                if (!formattedParts.hour ||
+                        !formattedParts.minute) {
+                    return Ext.String.htmlEncode(info);
+                }
+
+                return Ext.String.htmlEncode(
+                    info + ' ' + formattedParts.hour + ':' + formattedParts.minute
+                );
+            } catch (error) {
+                return Ext.String.htmlEncode(info);
+            }
+        }
+    },
+
     requires: [
         'BergInventurModern.view.main.MainController',
         'BergInventurModern.view.count.Count',
@@ -122,7 +238,9 @@ Ext.define('BergInventurModern.view.main.Main', {
                         '  <div class="bi-search-result-row"><strong>Hersteller-Art.-Nr.:</strong> {art_herst_art_nr:htmlEncode}</div>',
                         '  <div class="bi-search-result-row"><strong>Lagerfach:</strong> {fachnummer:htmlEncode}</div>',
                         '  <div class="bi-search-result-text">{art_text1:htmlEncode}</div>',
-                        '  <tpl if="info"><div class="bi-search-result-info">{info:htmlEncode}</div></tpl>',
+                        '  <tpl if="info">',
+                        '    <div class="bi-search-result-info">{[BergInventurModern.view.main.Main.formatInventoryInfo(values)]}</div>',
+                        '  </tpl>',
                         '</div>'
                     ],
                     listeners: {
