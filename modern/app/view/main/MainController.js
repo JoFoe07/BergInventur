@@ -216,13 +216,13 @@ Ext.define('BergInventurModern.view.main.MainController', {
 
         if (Number(rawValue) != Number(this.countState.menge_im_fach)) {
             Ext.Msg.show({
-                title: 'Abweichungen in der Menge ',
+                title: 'Abweichungen in der Menge',
                 message: Ext.String.htmlEncode(
                     String(BergInventurModern.session.employeeName || '')
                 ) + ', ' +
                     'das Ergebnis stimmt nicht mit dem Bestand der NAV überein.' +
                     'Möchten Sie trotzdem den gezählten Bestand speichern?',
-                width: 300,
+                width: 320,
                 buttons: [
                     {
                         itemId: 'yes',
@@ -230,8 +230,7 @@ Ext.define('BergInventurModern.view.main.MainController', {
                     },
                     {
                         itemId: 'no',
-                        text: 'noch einmal zählen',
-                        ui: 'action'
+                        text: 'noch einmal zählen'
                     }
                 ],
                 fn: function(buttonId) {
