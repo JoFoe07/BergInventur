@@ -13,6 +13,7 @@ Ext.define('BergInventurModern.view.main.MainController', {
         this.searchStore = null;
         this.searchInProgress = false;
         this.countState = null;
+        this.countCheckInProgress = false;
         this.saveInProgress = false;
     },
 
@@ -24,6 +25,7 @@ Ext.define('BergInventurModern.view.main.MainController', {
         );
         this.hideMessage();
         this.hideSelectedResult();
+        this.focusSearchField();
     },
 
     onSessionDetailsToggle: function(button) {
@@ -44,6 +46,12 @@ Ext.define('BergInventurModern.view.main.MainController', {
         this.lookupReference('searchField').setPlaceHolder(
             'Lagerfach min. 6 Zeichen eingeben'
         );
+    },
+
+    onSearchKeyup: function(textfield, e) {
+        if (this.isEnterKey(e)) {
+            this.onSearchTap();
+        }
     },
 
     onSearchTap: function() {
@@ -67,6 +75,7 @@ Ext.define('BergInventurModern.view.main.MainController', {
                 'Bitte mindestens ' + minimumLength + ' Zeichen eingeben. (' +
                 validationValue.length + ')'
             );
+            this.focusSearchField();
             return;
         }
 
@@ -90,6 +99,7 @@ Ext.define('BergInventurModern.view.main.MainController', {
             callback: function(records, operation, success) {
                 me.searchInProgress = false;
                 me.lookupReference('searchButton').setDisabled(false);
+                me.focusSearchField();
 
                 if (success !== true) {
                     me.showMessage('Die Suche konnte nicht durchgeführt werden.');
@@ -145,6 +155,7 @@ Ext.define('BergInventurModern.view.main.MainController', {
             countView = this.lookupReference('countView');
 
         this.saveInProgress = false;
+        this.countCheckInProgress = false;
         this.countState = {
             carlanr: record.get('carlanr'),
             menge_im_fach: record.get('menge'),
@@ -193,7 +204,7 @@ Ext.define('BergInventurModern.view.main.MainController', {
 
         Ext.defer(function() {
             if (!countField.destroyed && !countView.getHidden()) {
-                countField.focus();
+                countField.focus(true);
             }
         }, 100);
     },
@@ -208,14 +219,23 @@ Ext.define('BergInventurModern.view.main.MainController', {
         this.hideCountSaveButton();
     },
 
+    onCountKeyup: function(textfield, e) {
+        if (this.isEnterKey(e)) {
+            this.onCountCheck();
+        }
+    },
+
     onCountCheck: function() {
         var countField = this.lookupReference('countField'),
             rawValue = this.getRawCountValue(countField),
             me = this;
 
-        if (!this.countState) {
+        if (!this.countState || this.countCheckInProgress) {
             return;
         }
+
+        this.countCheckInProgress = true;
+        this.lookupReference('countCheckButton').setDisabled(true);
 
         this.countState.readyToSave = false;
         this.countState.deviationConfirmed = false;
@@ -223,7 +243,8 @@ Ext.define('BergInventurModern.view.main.MainController', {
 
         if (rawValue === '') {
             Ext.Msg.alert('Fehler', 'gezählt darf nicht leer sein', function() {
-                countField.focus();
+                me.releaseCountCheckLock();
+                me.focusCountField();
             });
             return;
         }
@@ -250,16 +271,19 @@ Ext.define('BergInventurModern.view.main.MainController', {
                     }
                 ],
                 fn: function(buttonId) {
+                    me.releaseCountCheckLock();
+
                     if (buttonId === 'yes') {
                         me.markCountReady(true);
                     } else {
-                        countField.focus();
+                        me.focusCountField();
                     }
                 }
             });
             return;
         }
 
+        this.releaseCountCheckLock();
         this.markCountReady(false);
     },
 
@@ -272,11 +296,13 @@ Ext.define('BergInventurModern.view.main.MainController', {
 
         countField.setValue('');
         this.countState = null;
+        this.countCheckInProgress = false;
         this.saveInProgress = false;
         this.hideCountStatus();
         this.hideCountSaveButton();
         this.lookupReference('countView').setHidden(true);
         this.lookupReference('searchContent').setHidden(false);
+        this.focusSearchField();
     },
 
     markCountReady: function(deviationConfirmed) {
@@ -424,6 +450,7 @@ Ext.define('BergInventurModern.view.main.MainController', {
         var countField = this.lookupReference('countField');
 
         this.countState = null;
+        this.countCheckInProgress = false;
         this.saveInProgress = false;
         this.setCountControlsDisabled(false);
         countField.setValue('');
@@ -432,6 +459,45 @@ Ext.define('BergInventurModern.view.main.MainController', {
         this.lookupReference('countView').setHidden(true);
         this.lookupReference('searchContent').setHidden(false);
         this.onSearchTap();
+    },
+
+    releaseCountCheckLock: function() {
+        this.countCheckInProgress = false;
+        this.lookupReference('countCheckButton').setDisabled(false);
+    },
+
+    focusSearchField: function() {
+        var me = this;
+
+        Ext.defer(function() {
+            var field = me.lookupReference('searchField'),
+                content = me.lookupReference('searchContent');
+
+            if (field && !field.destroyed && content && !content.getHidden() &&
+                    me.searchInProgress !== true) {
+                field.focus(true);
+            }
+        }, 100);
+    },
+
+    focusCountField: function() {
+        var me = this;
+
+        Ext.defer(function() {
+            var field = me.lookupReference('countField'),
+                view = me.lookupReference('countView');
+
+            if (field && !field.destroyed && view && !view.getHidden() &&
+                    me.countCheckInProgress !== true && me.saveInProgress !== true) {
+                field.focus(true);
+            }
+        }, 100);
+    },
+
+    isEnterKey: function(e) {
+        var browserEvent = e && e.event ? e.event : e;
+
+        return browserEvent && browserEvent.keyCode === 13;
     },
 
     setCountControlsDisabled: function(disabled) {

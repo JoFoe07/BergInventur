@@ -62,7 +62,8 @@ Ext.define('BergInventurModern.view.count.Count', {
             required: true,
             value: '',
             listeners: {
-                change: 'onCountValueChange'
+                change: 'onCountValueChange',
+                keyup: 'onCountKeyup'
             }
         },
         {

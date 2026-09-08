@@ -236,7 +236,10 @@ Ext.define('BergInventurModern.view.main.Main', {
                     label: 'Suche',
                     labelAlign: 'top',
                     clearIcon: true,
-                    placeHolder: 'Lagerfach min. 6 Zeichen eingeben'
+                    placeHolder: 'Lagerfach min. 6 Zeichen eingeben',
+                    listeners: {
+                        keyup: 'onSearchKeyup'
+                    }
                 },
                 {
                     xtype: 'button',
