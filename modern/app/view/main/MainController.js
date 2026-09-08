@@ -26,6 +26,14 @@ Ext.define('BergInventurModern.view.main.MainController', {
         this.hideSelectedResult();
     },
 
+    onSessionDetailsToggle: function(button) {
+        var details = button.up('app-main').down('#sessionDetails'),
+            expand = details.getHidden();
+
+        details.setHidden(!expand);
+        button.setText(expand ? 'Weniger' : 'Mehr ›');
+    },
+
     onArticleModeCheck: function() {
         this.lookupReference('searchField').setPlaceHolder(
             'Hersteller-Nr. oder EAN eingeben, min. 4 Zeichen'

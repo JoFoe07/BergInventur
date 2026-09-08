@@ -158,27 +158,60 @@ Ext.define('BergInventurModern.view.main.Main', {
                     cls: 'bi-search-session',
                     items: [
                         {
-                            xtype: 'component',
-                            html: '<strong>Mitarbeiter:</strong>'
+                            xtype: 'container',
+                            cls: 'bi-search-session-summary',
+                            layout: {
+                                type: 'hbox',
+                                align: 'center'
+                            },
+                            items: [
+                                {
+                                    xtype: 'component',
+                                    itemId: 'sessionSummaryText',
+                                    cls: 'bi-search-session-summary-text',
+                                    flex: 1
+                                },
+                                {
+                                    xtype: 'button',
+                                    itemId: 'sessionToggleButton',
+                                    cls: 'bi-search-session-toggle',
+                                    text: 'Mehr ›',
+                                    listeners: {
+                                        tap: 'onSessionDetailsToggle'
+                                    }
+                                }
+                            ]
                         },
                         {
-                            xtype: 'component',
-                            itemId: 'employeeName',
-                            cls: 'bi-search-session-value'
-                        },
-                        {
-                            xtype: 'component',
-                            html: '<strong>Standort:</strong>'
-                        },
-                        {
-                            xtype: 'component',
-                            itemId: 'standortName',
-                            cls: 'bi-search-session-value'
-                        },
-                        {
-                            xtype: 'component',
-                            reference: 'versionDisplay',
-                            cls: 'bi-search-version'
+                            xtype: 'container',
+                            itemId: 'sessionDetails',
+                            cls: 'bi-search-session-details',
+                            hidden: true,
+                            items: [
+                                {
+                                    xtype: 'component',
+                                    html: '<strong>Mitarbeiter:</strong>'
+                                },
+                                {
+                                    xtype: 'component',
+                                    itemId: 'employeeName',
+                                    cls: 'bi-search-session-value'
+                                },
+                                {
+                                    xtype: 'component',
+                                    html: '<strong>Standort:</strong>'
+                                },
+                                {
+                                    xtype: 'component',
+                                    itemId: 'standortName',
+                                    cls: 'bi-search-session-value'
+                                },
+                                {
+                                    xtype: 'component',
+                                    reference: 'versionDisplay',
+                                    cls: 'bi-search-version'
+                                }
+                            ]
                         }
                     ]
                 },
@@ -263,7 +296,12 @@ Ext.define('BergInventurModern.view.main.Main', {
     },
 
     setLoginResult: function(employeeName, standortName) {
+        this.down('#sessionSummaryText').setHtml(
+            Ext.String.htmlEncode(employeeName + ' · ' + standortName)
+        );
         this.down('#employeeName').setHtml(Ext.String.htmlEncode(employeeName));
         this.down('#standortName').setHtml(Ext.String.htmlEncode(standortName));
+        this.down('#sessionDetails').setHidden(true);
+        this.down('#sessionToggleButton').setText('Mehr ›');
     }
 });

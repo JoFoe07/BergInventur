@@ -93,9 +93,32 @@
 
 .bi-search-session {
     margin-bottom: 8px;
-    padding: 8px 10px;
+    padding: 0;
     background: #fff;
     font-size: 13px;
+}
+
+.bi-search-session-summary {
+    min-height: 48px;
+}
+
+.bi-search-session-summary-text {
+    min-width: 0;
+    padding: 6px 8px 6px 10px;
+    line-height: 18px;
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+
+.bi-search-session-toggle {
+    min-width: 88px;
+    min-height: 48px;
+    flex-shrink: 0;
+}
+
+.bi-search-session-details {
+    padding: 8px 10px 10px;
+    border-top: 1px solid #eee;
 }
 
 .bi-search-session-value {
