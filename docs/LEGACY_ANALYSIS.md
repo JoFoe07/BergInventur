@@ -905,3 +905,17 @@ ungültigen Statement-Handle.
 Die fachliche INSERT-/UPDATE-Entscheidung, ihre Schlüssel einschließlich
 Lagerplatz, SQL-Zielspalten, Statuswerte, Zeitbildung sowie Request- und
 Responsefelder wurden nicht verändert.
+
+# 29. DML-Cursor-Korrektur nach erstem Modern-Schreibtest
+
+Beim ersten realen Schreibtest der Modern-App am 08.09.2026 wurde das UPDATE
+nachweislich in der Datenbank ausgeführt, der Backend-Response meldete jedoch
+`success: false`. Als wahrscheinlichste technische Ursache wurde die auch an
+INSERT und UPDATE übergebene Option `SQLSRV_CURSOR_KEYSET` identifiziert. Diese
+Cursoroption ist für die beiden DML-Aufrufe nicht erforderlich und wurde dort
+entfernt. Der vorgelagerte SELECT verwendet den KEYSET-Cursor für
+`sqlsrv_num_rows()` weiterhin unverändert.
+
+Die Prüfung über `sqlsrv_rows_affected()`, die fachliche
+INSERT-/UPDATE-Entscheidung sowie SQL-, Request- und Responsevertrag bleiben
+unverändert.

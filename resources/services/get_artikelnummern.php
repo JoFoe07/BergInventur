@@ -195,8 +195,7 @@ switch($_REQUEST["action"]) {
 		            and status <> 'gebucht'";
 
 		$params = array();
-		$options =  array( "Scrollable" => SQLSRV_CURSOR_KEYSET );
-		$ergebnis = sqlsrv_query( $conn, $query, $params, $options );
+		$ergebnis = sqlsrv_query( $conn, $query, $params );
 	}
 	else if ($existing_rows !== false)
 	{
@@ -217,8 +216,7 @@ switch($_REQUEST["action"]) {
 			utf8_decode('gezählt')
 		);
 
-		$options =  array( "Scrollable" => SQLSRV_CURSOR_KEYSET );
-		$ergebnis = sqlsrv_query( $conn, $query, $params, $options );
+		$ergebnis = sqlsrv_query( $conn, $query, $params );
 	};
 
 	$affected_rows = ($ergebnis === false) ? false : sqlsrv_rows_affected($ergebnis);
