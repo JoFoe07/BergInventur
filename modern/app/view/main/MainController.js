@@ -4,6 +4,7 @@ Ext.define('BergInventurModern.view.main.MainController', {
 
     requires: [
         'BergInventurModern.store.InventoryItems',
+        'Ext.Ajax',
         'Ext.MessageBox',
         'Ext.Toolbar'
     ],
@@ -12,6 +13,7 @@ Ext.define('BergInventurModern.view.main.MainController', {
         this.searchStore = null;
         this.searchInProgress = false;
         this.countState = null;
+        this.saveInProgress = false;
     },
 
     onSearchActivate: function() {
@@ -127,13 +129,14 @@ Ext.define('BergInventurModern.view.main.MainController', {
             return;
         }
 
-        this.beginCount(record);
+        this.beginCount(record, articleMode, activityType);
     },
 
-    beginCount: function(record) {
+    beginCount: function(record, articleMode, activityType) {
         var countField = this.lookupReference('countField'),
             countView = this.lookupReference('countView');
 
+        this.saveInProgress = false;
         this.countState = {
             carlanr: record.get('carlanr'),
             menge_im_fach: record.get('menge'),
@@ -146,7 +149,9 @@ Ext.define('BergInventurModern.view.main.MainController', {
             me_we: record.get('me_we'),
             ze: record.get('ze'),
             readyToSave: false,
-            deviationConfirmed: false
+            deviationConfirmed: false,
+            articleMode: articleMode,
+            activityType: activityType
         };
 
         this.setCountDisplay(
@@ -173,6 +178,8 @@ Ext.define('BergInventurModern.view.main.MainController', {
 
         countField.setValue('');
         this.hideCountStatus();
+        this.hideCountSaveButton();
+        this.setCountControlsDisabled(false);
         this.lookupReference('searchContent').setHidden(true);
         countView.setHidden(false);
 
@@ -190,6 +197,7 @@ Ext.define('BergInventurModern.view.main.MainController', {
         }
 
         this.hideCountStatus();
+        this.hideCountSaveButton();
     },
 
     onCountCheck: function() {
@@ -250,9 +258,15 @@ Ext.define('BergInventurModern.view.main.MainController', {
     onCountBack: function() {
         var countField = this.lookupReference('countField');
 
+        if (this.saveInProgress) {
+            return;
+        }
+
         countField.setValue('');
         this.countState = null;
+        this.saveInProgress = false;
         this.hideCountStatus();
+        this.hideCountSaveButton();
         this.lookupReference('countView').setHidden(true);
         this.lookupReference('searchContent').setHidden(false);
     },
@@ -260,9 +274,172 @@ Ext.define('BergInventurModern.view.main.MainController', {
     markCountReady: function(deviationConfirmed) {
         this.countState.readyToSave = true;
         this.countState.deviationConfirmed = deviationConfirmed;
-        this.showCountStatus(
-            'Zählung geprüft – Speichern in Phase 2C Teil 2 noch deaktiviert.'
+        this.showCountStatus('Zählung geprüft – bereit zum Speichern.');
+        this.lookupReference('countSaveButton').setHidden(false);
+        this.lookupReference('countSaveButton').setDisabled(false);
+    },
+
+    onCountSave: function() {
+        var me = this,
+            payload;
+
+        if (!this.canSaveCount()) {
+            return;
+        }
+
+        payload = this.buildCountPayload(this.countState);
+        this.saveInProgress = true;
+        this.setCountControlsDisabled(true);
+
+        try {
+            Ext.Ajax.request({
+                url: BergInventurModern.getServiceUrl(
+                    BergInventurModern.config.inventoryServiceBaseUrl,
+                    'get_artikelnummern.php'
+                ) + '?action=create',
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                jsonData: payload,
+                success: function(response) {
+                    me.handleCountSaveResponse(response);
+                },
+                failure: function(response) {
+                    me.handleCountSaveTransportFailure(response);
+                }
+            });
+        } catch (error) {
+            this.handleCountSaveUncertain();
+        }
+    },
+
+    canSaveCount: function() {
+        var articleModeField = this.lookupReference('articleModeField');
+
+        return this.countState !== null &&
+            this.countState.readyToSave === true &&
+            this.saveInProgress !== true &&
+            this.countState.articleMode === false &&
+            this.countState.activityType === null &&
+            articleModeField.getChecked() === false;
+    },
+
+    buildCountPayload: function(countState) {
+        return {
+            carlanr: countState.carlanr,
+            menge_im_fach: countState.menge_im_fach,
+            gezaehlt: countState.gezaehlt,
+            zaehler: countState.zaehler,
+            fachnummer: countState.fachnummer,
+            art_text1: countState.art_text1,
+            art_herst_art_nr: countState.art_herst_art_nr,
+            lagerort: countState.lagerort,
+            me_we: countState.me_we,
+            ze: countState.ze
+        };
+    },
+
+    handleCountSaveResponse: function(response) {
+        var decoded = this.decodeCountSaveResponse(response),
+            countState = this.countState;
+
+        if (!decoded.valid) {
+            this.handleCountSaveUncertain();
+            return;
+        }
+
+        if (!decoded.data || decoded.data.success !== true) {
+            this.handleCountSaveFailure();
+            return;
+        }
+
+        Ext.Msg.alert(
+            'Katalogartikel-Nr. ' + Ext.String.htmlEncode(String(countState.carlanr || '')),
+            'Menge ' + Ext.String.htmlEncode(String(countState.gezaehlt)) + ' wurden eingetragen'
         );
+        this.completeCountSave();
+    },
+
+    handleCountSaveTransportFailure: function(response) {
+        var decoded = this.decodeCountSaveResponse(response);
+
+        if (decoded.valid && decoded.data && decoded.data.success === false) {
+            this.handleCountSaveFailure();
+            return;
+        }
+
+        this.handleCountSaveUncertain();
+    },
+
+    decodeCountSaveResponse: function(response) {
+        try {
+            return {
+                valid: true,
+                data: Ext.decode(response && response.responseText)
+            };
+        } catch (error) {
+            return {
+                valid: false,
+                data: null
+            };
+        }
+    },
+
+    handleCountSaveFailure: function() {
+        var countState = this.countState;
+
+        this.releaseCountSaveLock();
+        Ext.Msg.alert(
+            'Katalogartikel-Nr. ' + Ext.String.htmlEncode(
+                String(countState && countState.carlanr || '')
+            ),
+            'Fehler beim Speichern'
+        );
+    },
+
+    handleCountSaveUncertain: function() {
+        this.releaseCountSaveLock();
+        Ext.Msg.alert(
+            'Speicherstatus unklar',
+            'Der Speicherstatus konnte nicht sicher festgestellt werden. ' +
+            'Bitte prüfen Sie den aktuellen Bestand, bevor Sie erneut speichern.'
+        );
+    },
+
+    releaseCountSaveLock: function() {
+        this.saveInProgress = false;
+        this.setCountControlsDisabled(false);
+    },
+
+    completeCountSave: function() {
+        var countField = this.lookupReference('countField');
+
+        this.countState = null;
+        this.saveInProgress = false;
+        this.setCountControlsDisabled(false);
+        countField.setValue('');
+        this.hideCountStatus();
+        this.hideCountSaveButton();
+        this.lookupReference('countView').setHidden(true);
+        this.lookupReference('searchContent').setHidden(false);
+        this.onSearchTap();
+    },
+
+    setCountControlsDisabled: function(disabled) {
+        this.lookupReference('countField').setDisabled(disabled);
+        this.lookupReference('countCheckButton').setDisabled(disabled);
+        this.lookupReference('countBackButton').setDisabled(disabled);
+        this.lookupReference('countSaveButton').setDisabled(
+            disabled || !this.countState || this.countState.readyToSave !== true
+        );
+    },
+
+    hideCountSaveButton: function() {
+        var button = this.lookupReference('countSaveButton');
+
+        button.setDisabled(true);
+        button.setHidden(true);
     },
 
     getRawCountValue: function(countField) {

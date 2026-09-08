@@ -1,7 +1,7 @@
 {
     "name": "BergInventurModern",
     "namespace": "BergInventurModern",
-    "version": "1.0.3.0",
+    "version": "1.0.4.0",
     "framework": "ext",
     "toolkit": "modern",
     "theme": "theme-material",

@@ -83,6 +83,18 @@ Ext.define('BergInventurModern.view.count.Count', {
         },
         {
             xtype: 'button',
+            reference: 'countSaveButton',
+            cls: 'bi-count-button',
+            ui: 'action',
+            text: 'Speichern',
+            hidden: true,
+            disabled: true,
+            listeners: {
+                tap: 'onCountSave'
+            }
+        },
+        {
+            xtype: 'button',
             reference: 'countBackButton',
             cls: 'bi-count-button',
             text: 'Zurück',
