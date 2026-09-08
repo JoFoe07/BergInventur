@@ -255,3 +255,58 @@
     min-height: 54px;
     margin-bottom: 10px;
 }
+
+@media (max-width: 600px) {
+    .bi-search-titlebar {
+        height: 44px;
+        min-height: 44px;
+    }
+
+    .bi-search-titlebar .x-title {
+        font-size: 18px;
+    }
+
+    .bi-search-content {
+        padding: 6px !important;
+    }
+
+    .bi-search-session {
+        margin-bottom: 4px;
+    }
+
+    .bi-search-session-summary {
+        min-height: 0;
+    }
+
+    .bi-search-session-summary-text {
+        padding: 2px 4px 2px 6px;
+        line-height: 16px;
+    }
+
+    .bi-search-session-toggle {
+        min-width: 80px;
+        min-height: 44px;
+    }
+
+    .bi-search-mode {
+        margin-bottom: 2px;
+    }
+
+    .bi-search-field {
+        margin-bottom: 3px;
+    }
+
+    .bi-search-field .x-label-el {
+        padding-top: 0;
+        padding-bottom: 2px;
+    }
+
+    .bi-search-field .x-input-el {
+        min-height: 44px;
+    }
+
+    .bi-search-button {
+        min-height: 52px;
+        margin-bottom: 4px;
+    }
+}

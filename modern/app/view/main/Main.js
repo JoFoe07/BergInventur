@@ -139,6 +139,7 @@ Ext.define('BergInventurModern.view.main.Main', {
     items: [
         {
             xtype: 'titlebar',
+            cls: 'bi-search-titlebar',
             docked: 'top',
             title: 'BergInventur'
         },
@@ -220,7 +221,8 @@ Ext.define('BergInventurModern.view.main.Main', {
                     reference: 'articleModeField',
                     cls: 'bi-search-mode',
                     label: 'Lagerfach des Artikels suchen?',
-                    labelAlign: 'top',
+                    labelAlign: 'left',
+                    labelWidth: '85%',
                     checked: false,
                     listeners: {
                         check: 'onArticleModeCheck',
