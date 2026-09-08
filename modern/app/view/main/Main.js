@@ -253,6 +253,25 @@ Ext.define('BergInventurModern.view.main.Main', {
                 },
                 {
                     xtype: 'component',
+                    reference: 'multiResultSummary',
+                    cls: 'bi-search-multi-summary',
+                    hidden: true
+                },
+                {
+                    xtype: 'searchfield',
+                    reference: 'articleScanField',
+                    cls: 'bi-search-article-scan',
+                    label: 'Artikel scannen',
+                    labelAlign: 'top',
+                    clearIcon: true,
+                    hidden: true,
+                    disabled: true,
+                    listeners: {
+                        keyup: 'onArticleLookupKeyup'
+                    }
+                },
+                {
+                    xtype: 'component',
                     reference: 'messageDisplay',
                     cls: 'bi-search-message',
                     hidden: true
@@ -273,9 +292,12 @@ Ext.define('BergInventurModern.view.main.Main', {
                     emptyText: 'Es wurden keine Artikel gefunden.',
                     itemTpl: [
                         '<div class="bi-search-result-card">',
-                        '  <div class="bi-search-result-row"><strong>Hersteller-Art.-Nr.:</strong> {art_herst_art_nr:htmlEncode}</div>',
-                        '  <div class="bi-search-result-row"><strong>Lagerfach:</strong> {fachnummer:htmlEncode}</div>',
+                        '  <div class="bi-search-result-manufacturer"><strong>Hersteller-Art.-Nr.:</strong> {art_herst_art_nr:htmlEncode}</div>',
                         '  <div class="bi-search-result-text">{art_text1:htmlEncode}</div>',
+                        '  <tpl if="carlanr">',
+                        '    <div class="bi-search-result-carlanr">Katalogartikel-Nr. {carlanr:htmlEncode}</div>',
+                        '  </tpl>',
+                        '  <div class="bi-search-result-bin"><strong>Lagerfach:</strong> {fachnummer:htmlEncode}</div>',
                         '  <tpl if="info">',
                         '    <div class="bi-search-result-info">{[BergInventurModern.view.main.Main.formatInventoryInfo(values)]}</div>',
                         '  </tpl>',

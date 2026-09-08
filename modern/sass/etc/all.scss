@@ -147,6 +147,25 @@
     margin-bottom: 8px;
 }
 
+.bi-search-multi-summary {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 6px;
+    padding: 8px 10px;
+    background: #fff;
+    overflow-wrap: break-word;
+}
+
+.bi-search-article-scan {
+    width: 100%;
+    margin-bottom: 6px;
+}
+
+.bi-search-article-scan .x-input-el {
+    min-height: 48px;
+}
+
 .bi-search-message {
     margin-bottom: 8px;
     padding: 10px;
@@ -165,6 +184,29 @@
     padding: 12px;
     border-bottom: 1px solid #ddd;
     background: #fff;
+}
+
+.bi-search-results-compact .bi-search-result-card {
+    min-height: 0;
+    padding: 8px 10px;
+}
+
+.bi-search-result-manufacturer {
+    margin-bottom: 3px;
+    font-size: 17px;
+    overflow-wrap: break-word;
+}
+
+.bi-search-result-carlanr,
+.bi-search-result-bin {
+    margin-bottom: 3px;
+    color: #555;
+    font-size: 12px;
+    overflow-wrap: break-word;
+}
+
+.bi-search-results-single-bin .bi-search-result-bin {
+    display: none;
 }
 
 .bi-search-result-row,
@@ -308,5 +350,23 @@
     .bi-search-button {
         min-height: 52px;
         margin-bottom: 4px;
+    }
+
+    .bi-search-multi-summary {
+        margin-bottom: 3px;
+        padding: 5px 7px;
+    }
+
+    .bi-search-article-scan {
+        margin-bottom: 3px;
+    }
+
+    .bi-search-article-scan .x-label-el {
+        padding-top: 0;
+        padding-bottom: 2px;
+    }
+
+    .bi-search-article-scan .x-input-el {
+        min-height: 44px;
     }
 }

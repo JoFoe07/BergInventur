@@ -25,6 +25,7 @@ Ext.define('BergInventurModern.view.main.MainController', {
         );
         this.hideMessage();
         this.hideSelectedResult();
+        this.hideMultiResultUi();
         this.focusSearchField();
     },
 
@@ -40,12 +41,14 @@ Ext.define('BergInventurModern.view.main.MainController', {
         this.lookupReference('searchField').setPlaceHolder(
             'Hersteller-Nr. oder EAN eingeben, min. 4 Zeichen'
         );
+        this.hideMultiResultUi();
     },
 
     onArticleModeUncheck: function() {
         this.lookupReference('searchField').setPlaceHolder(
             'Lagerfach min. 6 Zeichen eingeben'
         );
+        this.hideMultiResultUi();
     },
 
     onSearchKeyup: function(textfield, e) {
@@ -67,6 +70,7 @@ Ext.define('BergInventurModern.view.main.MainController', {
             return;
         }
 
+        this.hideMultiResultUi();
         store.removeAll();
         this.hideSelectedResult();
 
@@ -99,18 +103,66 @@ Ext.define('BergInventurModern.view.main.MainController', {
             callback: function(records, operation, success) {
                 me.searchInProgress = false;
                 me.lookupReference('searchButton').setDisabled(false);
-                me.focusSearchField();
 
                 if (success !== true) {
                     me.showMessage('Die Suche konnte nicht durchgeführt werden.');
+                    me.focusSearchField();
                     return;
                 }
 
                 if (!records || records.length === 0) {
                     me.showMessage('Es wurden keine Artikel gefunden.');
+                    me.focusSearchField();
+                    return;
                 }
+
+                if (articleMode === false && records.length > 1) {
+                    me.showMultiResultUi(records);
+                    return;
+                }
+
+                me.focusSearchField();
             }
         });
+    },
+
+    onArticleLookupKeyup: function(textfield, e) {
+        if (this.isEnterKey(e)) {
+            this.onArticleLookup();
+        }
+    },
+
+    onArticleLookup: function() {
+        var field = this.lookupReference('articleScanField'),
+            searchContent = this.lookupReference('searchContent'),
+            keyword = String(field.getValue() || ''),
+            normalizedKeyword = this.normalizeArticleIdentifier(keyword),
+            localMatches;
+
+        if (field.getHidden() || searchContent.getHidden()) {
+            return;
+        }
+
+        if (normalizedKeyword === '') {
+            this.finishArticleLookupFailure('Bitte Artikel scannen.');
+            return;
+        }
+
+        this.hideMessage();
+        localMatches = this.findLocalArticleMatches(keyword);
+
+        if (localMatches.length === 1) {
+            this.completeArticleLookupSelection(localMatches[0]);
+            return;
+        }
+
+        this.finishArticleLookupFailure(
+            localMatches.length === 0 ?
+                'Der Artikel wurde im aktuellen Lagerfach nicht gefunden. ' +
+                    'Bitte erneut scannen oder Artikel manuell auswählen.' :
+                'Der Artikel konnte im aktuellen Lagerfach nicht eindeutig ' +
+                    'ermittelt werden. Bitte erneut scannen oder Artikel manuell auswählen.'
+        );
     },
 
     onResultItemTap: function(dataview, index, target, record) {
@@ -302,7 +354,7 @@ Ext.define('BergInventurModern.view.main.MainController', {
         this.hideCountSaveButton();
         this.lookupReference('countView').setHidden(true);
         this.lookupReference('searchContent').setHidden(false);
-        this.focusSearchField();
+        this.focusReadySearchField();
     },
 
     markCountReady: function(deviationConfirmed) {
@@ -480,6 +532,30 @@ Ext.define('BergInventurModern.view.main.MainController', {
         }, 100);
     },
 
+    focusArticleScanField: function() {
+        var me = this;
+
+        Ext.defer(function() {
+            var field = me.lookupReference('articleScanField'),
+                content = me.lookupReference('searchContent');
+
+            if (field && !field.destroyed && !field.getHidden() &&
+                    content && !content.getHidden()) {
+                field.focus(true);
+            }
+        }, 100);
+    },
+
+    focusReadySearchField: function() {
+        var field = this.lookupReference('articleScanField');
+
+        if (field && !field.getHidden()) {
+            this.focusArticleScanField();
+        } else {
+            this.focusSearchField();
+        }
+    },
+
     focusCountField: function() {
         var me = this;
 
@@ -587,6 +663,113 @@ Ext.define('BergInventurModern.view.main.MainController', {
 
         display.setHtml('');
         display.setHidden(true);
+    },
+
+    showMultiResultUi: function(records) {
+        var summary = this.lookupReference('multiResultSummary'),
+            field = this.lookupReference('articleScanField'),
+            resultsList = this.lookupReference('resultsList'),
+            firstBin = String(records[0].get('fachnummer') || ''),
+            sameBin = firstBin !== '',
+            index,
+            html;
+
+        for (index = 1; index < records.length; index += 1) {
+            if (String(records[index].get('fachnummer') || '') !== firstBin) {
+                sameBin = false;
+                break;
+            }
+        }
+
+        if (sameBin) {
+            html = '<strong>Lagerfach ' + Ext.String.htmlEncode(firstBin) + '</strong>' +
+                '<span>' + records.length + ' Artikel</span>';
+            resultsList.addCls('bi-search-results-single-bin');
+        } else {
+            html = '<strong>' + records.length + ' Treffer</strong>';
+            resultsList.removeCls('bi-search-results-single-bin');
+        }
+
+        resultsList.addCls('bi-search-results-compact');
+        summary.setHtml(html);
+        summary.setHidden(false);
+        field.setValue('');
+        field.setDisabled(false);
+        field.setHidden(false);
+        this.focusArticleScanField();
+    },
+
+    hideMultiResultUi: function() {
+        var summary = this.lookupReference('multiResultSummary'),
+            field = this.lookupReference('articleScanField'),
+            resultsList = this.lookupReference('resultsList');
+
+        if (summary) {
+            summary.setHtml('');
+            summary.setHidden(true);
+        }
+
+        if (field) {
+            field.setValue('');
+            field.setDisabled(true);
+            field.setHidden(true);
+        }
+
+        if (resultsList) {
+            resultsList.removeCls('bi-search-results-compact');
+            resultsList.removeCls('bi-search-results-single-bin');
+        }
+    },
+
+    normalizeArticleIdentifier: function(value) {
+        return String(value === null || value === undefined ? '' : value)
+            .replace(/ /g, '')
+            .toUpperCase();
+    },
+
+    findLocalArticleMatches: function(keyword) {
+        var normalizedKeyword = this.normalizeArticleIdentifier(keyword),
+            records = this.getSearchStore().getRange(),
+            matches = [],
+            index,
+            record,
+            carlanr,
+            manufacturerNumber;
+
+        if (normalizedKeyword === '') {
+            return matches;
+        }
+
+        for (index = 0; index < records.length; index += 1) {
+            record = records[index];
+            carlanr = this.normalizeArticleIdentifier(record.get('carlanr'));
+            manufacturerNumber = this.normalizeArticleIdentifier(
+                record.get('art_herst_art_nr')
+            );
+
+            if ((carlanr !== '' && carlanr === normalizedKeyword) ||
+                    (manufacturerNumber !== '' && manufacturerNumber === normalizedKeyword)) {
+                matches.push(record);
+            }
+        }
+
+        return matches;
+    },
+
+    completeArticleLookupSelection: function(record) {
+        var field = this.lookupReference('articleScanField');
+
+        field.setValue('');
+        this.hideMessage();
+        this.handleResultSelection(record);
+    },
+
+    finishArticleLookupFailure: function(message) {
+        var field = this.lookupReference('articleScanField');
+
+        this.showMessage(message);
+        field.setValue('');
+        this.focusArticleScanField();
     },
 
     getSearchStore: function() {
