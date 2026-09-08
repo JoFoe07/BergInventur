@@ -885,3 +885,23 @@ Der übernommene Stand enthält folgende fachlich relevante Korrekturen:
 Die Synchronisierung änderte weder Datenbankstrukturen noch andere Endpunkte.
 Es wurde keine zusätzliche Backendlogik ergänzt und kein produktives Deployment
 durchgeführt.
+
+# 28. Technische Korrektur der DML-Erfolgserkennung
+
+Am 08.09.2026 wurde die Erfolgserkennung im `create`-Zweig des versionierten
+`get_artikelnummern.php` technisch korrigiert. Zuvor wurde nach einem INSERT
+oder UPDATE `sqlsrv_num_rows()` verwendet. Diese Funktion zählt Zeilen eines
+Resultsets und ist nicht die passende SQLSRV-Funktion für die Auswertung eines
+DML-Statements.
+
+Der korrigierte Git-Stand prüft zunächst jeden beteiligten
+`sqlsrv_query()`-Rückgabewert. Nur für ein erfolgreich ausgeführtes INSERT oder
+UPDATE wird anschließend `sqlsrv_rows_affected()` ausgewertet. Ein positiver
+Wert führt wie bisher zu `success: true`; `false`, ein nicht verfügbarer
+Zeilenzähler oder null betroffene Zeilen führen zu `success: false`. Dadurch
+entstehen im Fehlerpfad keine Aufrufe der SQLSRV-Zählfunktionen mit einem
+ungültigen Statement-Handle.
+
+Die fachliche INSERT-/UPDATE-Entscheidung, ihre Schlüssel einschließlich
+Lagerplatz, SQL-Zielspalten, Statuswerte, Zeitbildung sowie Request- und
+Responsefelder wurden nicht verändert.

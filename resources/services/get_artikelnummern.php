@@ -38,7 +38,7 @@ $limit_per_page = 10;
 
 //$action = $_GET["act"];
 
-$artikelsuche = $_REQUEST["artikelsuche"];										  
+$artikelsuche = isset($_REQUEST["artikelsuche"]) ? $_REQUEST["artikelsuche"] : "";
 
 switch($_REQUEST["action"]) {
 
@@ -178,8 +178,10 @@ switch($_REQUEST["action"]) {
 	$params = array();
 	$options =  array( "Scrollable" => SQLSRV_CURSOR_KEYSET );
 	$dbresult = sqlsrv_query($conn, $sql , $params, $options );
+	$existing_rows = ($dbresult === false) ? false : sqlsrv_num_rows($dbresult);
+	$ergebnis = false;
 
-	if (sqlsrv_num_rows ($dbresult) >= 1) // bereits gezählt aber noch nicht gebucht dann ändern
+	if ($existing_rows !== false && $existing_rows >= 1) // bereits gezählt aber noch nicht gebucht dann ändern
 	{
 		// FIX: UPDATE ebenfalls mit lagerplatz absichern
 		$query = "update tools.[dbo].[jf_inventur_lagerfach]
@@ -196,7 +198,7 @@ switch($_REQUEST["action"]) {
 		$options =  array( "Scrollable" => SQLSRV_CURSOR_KEYSET );
 		$ergebnis = sqlsrv_query( $conn, $query, $params, $options );
 	}
-	else
+	else if ($existing_rows !== false)
 	{
 		$query = "INSERT INTO jf_inventur_lagerfach (katalogartikelnr, lagerplatz, art_herst_art_nr, art_text1, menge_im_fach, gezaehlt, gezaehlt_am,zaehler,lagerort,ze,me_we,status) values (?,?,?,?,?,?,?,?,?,?,?,?)";
 				
@@ -219,9 +221,9 @@ switch($_REQUEST["action"]) {
 		$ergebnis = sqlsrv_query( $conn, $query, $params, $options );
 	};
 
-	$int = sqlsrv_num_rows($ergebnis);
+	$affected_rows = ($ergebnis === false) ? false : sqlsrv_rows_affected($ergebnis);
 
-	if ($int >= 1)
+	if ($affected_rows !== false && $affected_rows > 0)
 	{
 		$result = array("success"=>true,"message"=>"Datensatz hinzugefügt");
 	}
