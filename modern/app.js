@@ -1,7 +1,7 @@
 Ext.namespace('BergInventurModern');
 
-BergInventurModern.version = '1.0.9.5';
-BergInventurModern.build = 'Phase 3D.2.3';
+BergInventurModern.version = '1.0.9.6';
+BergInventurModern.build = 'Phase 3D.3';
 BergInventurModern.config = {
     loginServiceBaseUrl: '/LagerTool/resources/services',
     inventoryServiceBaseUrl: 'resources/services'

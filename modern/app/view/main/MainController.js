@@ -12,6 +12,7 @@ Ext.define('BergInventurModern.view.main.MainController', {
 
     init: function() {
         this.searchStore = null;
+        this.activeBinSearch = null;
         this.searchInProgress = false;
         this.countState = null;
         this.countCheckInProgress = false;
@@ -76,6 +77,7 @@ Ext.define('BergInventurModern.view.main.MainController', {
         var searchField = this.lookupReference('searchField');
 
         searchField.setValue('');
+        this.activeBinSearch = null;
         this.hideMultiResultUi();
         this.getSearchStore().removeAll();
         this.hideMessage();
@@ -91,9 +93,15 @@ Ext.define('BergInventurModern.view.main.MainController', {
     },
 
     onSearchTap: function() {
-        var articleMode = this.lookupReference('articleModeField').getChecked(),
+        this.loadSearchResults(null);
+    },
+
+    loadSearchResults: function(continuation) {
+        var articleMode = continuation ? false :
+                this.lookupReference('articleModeField').getChecked(),
             searchField = this.lookupReference('searchField'),
-            keyword = String(searchField.getValue() || ''),
+            keyword = continuation ? continuation.keyword :
+                String(searchField.getValue() || ''),
             validationValue = keyword.replace(/-/g, ''),
             minimumLength = articleMode ? 4 : 6,
             store = this.getSearchStore(),
@@ -103,9 +111,14 @@ Ext.define('BergInventurModern.view.main.MainController', {
             return;
         }
 
+        this.activeBinSearch = null;
         this.hideMultiResultUi();
         store.removeAll();
         this.hideSelectedResult();
+
+        if (continuation) {
+            searchField.setValue(keyword);
+        }
 
         if (validationValue.length < minimumLength) {
             this.showMessage(
@@ -137,19 +150,46 @@ Ext.define('BergInventurModern.view.main.MainController', {
                 me.searchInProgress = false;
                 me.lookupReference('searchButton').setDisabled(false);
 
+                if (continuation &&
+                        (me.lookupReference('articleModeField').getChecked() !== false ||
+                        String(searchField.getValue() || '') !== keyword)) {
+                    me.finishCountSaveReload();
+                    return;
+                }
+
                 if (success !== true) {
+                    if (continuation) {
+                        me.finishCountSaveReload();
+                        return;
+                    }
+
                     me.showMessage('Die Suche konnte nicht durchgeführt werden.');
                     me.focusSearchField();
                     return;
                 }
 
                 if (!records || records.length === 0) {
+                    if (continuation) {
+                        me.finishCountSaveReload();
+                        return;
+                    }
+
                     me.showMessage('Es wurden keine Artikel gefunden.');
                     me.focusSearchField();
                     return;
                 }
 
                 if (articleMode === false) {
+                    me.activeBinSearch = me.createBinSearchState(records, keyword);
+
+                    if (continuation &&
+                            (me.activeBinSearch.fachnummer !== continuation.fachnummer ||
+                            me.activeBinSearch.recordCount <= 1 ||
+                            !me.hasUncountedInventoryItems(records))) {
+                        me.finishCountSaveReload();
+                        return;
+                    }
+
                     me.showMultiResultUi(records);
                     return;
                 }
@@ -499,7 +539,7 @@ Ext.define('BergInventurModern.view.main.MainController', {
             'Katalogartikel-Nr. ' + Ext.String.htmlEncode(String(countState.carlanr || '')),
             'Menge ' + Ext.String.htmlEncode(String(countState.gezaehlt)) + ' wurden eingetragen',
             function() {
-                me.focusSearchField();
+                me.focusReadySearchField();
             }
         );
         this.completeCountSave();
@@ -557,7 +597,57 @@ Ext.define('BergInventurModern.view.main.MainController', {
     },
 
     completeCountSave: function() {
+        var continuation = this.getCountSaveContinuation();
+
+        if (!continuation) {
+            this.resetInventoryUi();
+            return;
+        }
+
+        this.prepareCountSaveReload();
+        this.loadSearchResults(continuation);
+    },
+
+    getCountSaveContinuation: function() {
+        var activeBinSearch = this.activeBinSearch,
+            records = this.getSearchStore().getRange(),
+            actualBin = this.getUniqueBin(records),
+            searchValue = String(this.lookupReference('searchField').getValue() || ''),
+            countBin = String(this.countState && this.countState.fachnummer || '');
+
+        if (!activeBinSearch || activeBinSearch.recordCount <= 1 || records.length <= 1 ||
+                actualBin === null || actualBin !== activeBinSearch.fachnummer ||
+                actualBin !== countBin || searchValue !== activeBinSearch.keyword ||
+                this.lookupReference('articleModeField').getChecked() !== false) {
+            return null;
+        }
+
+        return {
+            keyword: activeBinSearch.keyword,
+            fachnummer: activeBinSearch.fachnummer
+        };
+    },
+
+    prepareCountSaveReload: function() {
+        var countField = this.lookupReference('countField');
+
+        this.countState = null;
+        this.countCheckInProgress = false;
+        this.saveInProgress = false;
+        this.setCountControlsDisabled(false);
+        countField.setValue('');
+        countField.blur();
+        this.hideCountStatus();
+        this.hideCountSaveButton();
+        this.hideMessage();
+        this.hideSelectedResult();
+        this.lookupReference('countView').setHidden(true);
+        this.lookupReference('searchContent').setHidden(false);
+    },
+
+    finishCountSaveReload: function() {
         this.resetInventoryUi();
+        this.focusSearchField();
     },
 
     releaseCountCheckLock: function() {
@@ -716,20 +806,11 @@ Ext.define('BergInventurModern.view.main.MainController', {
         var summary = this.lookupReference('multiResultSummary'),
             field = this.lookupReference('articleScanField'),
             resultsList = this.lookupReference('resultsList'),
-            firstBin = String(records[0].get('fachnummer') || ''),
-            sameBin = firstBin !== '',
-            index,
+            uniqueBin = this.getUniqueBin(records),
             html;
 
-        for (index = 1; index < records.length; index += 1) {
-            if (String(records[index].get('fachnummer') || '') !== firstBin) {
-                sameBin = false;
-                break;
-            }
-        }
-
-        if (sameBin) {
-            html = '<strong>Lagerfach ' + Ext.String.htmlEncode(firstBin) +
+        if (uniqueBin !== null) {
+            html = '<strong>Lagerfach ' + Ext.String.htmlEncode(uniqueBin) +
                 ' → ' + records.length + ' Artikel</strong>';
             resultsList.addCls('bi-search-results-single-bin');
         } else {
@@ -751,6 +832,52 @@ Ext.define('BergInventurModern.view.main.MainController', {
             field.setHidden(true);
             this.focusSearchField();
         }
+    },
+
+    createBinSearchState: function(records, keyword) {
+        return {
+            keyword: String(keyword || ''),
+            fachnummer: this.getUniqueBin(records),
+            recordCount: records ? records.length : 0
+        };
+    },
+
+    hasUncountedInventoryItems: function(records) {
+        var index,
+            info;
+
+        for (index = 0; records && index < records.length; index += 1) {
+            info = records[index].get('info');
+
+            if (typeof info !== 'string' || info === '') {
+                return true;
+            }
+        }
+
+        return false;
+    },
+
+    getUniqueBin: function(records) {
+        var firstBin,
+            index;
+
+        if (!records || records.length === 0) {
+            return null;
+        }
+
+        firstBin = String(records[0].get('fachnummer') || '');
+
+        if (firstBin === '') {
+            return null;
+        }
+
+        for (index = 1; index < records.length; index += 1) {
+            if (String(records[index].get('fachnummer') || '') !== firstBin) {
+                return null;
+            }
+        }
+
+        return firstBin;
     },
 
     hideMultiResultUi: function() {
@@ -844,6 +971,7 @@ Ext.define('BergInventurModern.view.main.MainController', {
             searchField = this.lookupReference('searchField');
 
         this.countState = null;
+        this.activeBinSearch = null;
         this.countCheckInProgress = false;
         this.saveInProgress = false;
         this.searchInProgress = false;
