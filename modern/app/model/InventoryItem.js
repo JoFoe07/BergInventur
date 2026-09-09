@@ -16,6 +16,7 @@ Ext.define('BergInventurModern.model.InventoryItem', {
         { name: 'lagerort' },
         { name: 'ze' },
         { name: 'Activity_Type' },
-        { name: 'gew_lieferdatum' }
+        { name: 'gew_lieferdatum' },
+        { name: 'barcodes' }
     ]
 });

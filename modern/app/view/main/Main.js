@@ -261,7 +261,7 @@ Ext.define('BergInventurModern.view.main.Main', {
                     xtype: 'searchfield',
                     reference: 'articleScanField',
                     cls: 'bi-search-article-scan',
-                    label: 'Artikel scannen',
+                    label: 'Artikel / EAN scannen',
                     labelAlign: 'top',
                     clearIcon: true,
                     hidden: true,

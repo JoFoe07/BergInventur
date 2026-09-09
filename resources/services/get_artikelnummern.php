@@ -32,6 +32,50 @@ function jf_mssql_escape_string($daten) {
 	return $daten;
 };
 
+function load_inventory_barcodes($conn, $item_numbers) {
+	$barcodes_by_item = array();
+	$item_batches = array_chunk($item_numbers, 500);
+
+	foreach ($item_batches as $item_batch) {
+		$placeholders = implode(',', array_fill(0, count($item_batch), '?'));
+		$sql = "select barcode_source.nav_item_no, barcode_source.barcode
+				from (
+					select NSI.[Item No_] as nav_item_no, NSI.[Bar Code] as barcode
+					from NAV_PROD.dbo.[BAT".'$'."Nonstock Item] NSI WITH (NOLOCK)
+					where NSI.[Item No_] in (".$placeholders.")
+					  and LEN(NSI.[Bar Code]) > 0
+					union all
+					select XREF.[Item No_] as nav_item_no, XREF.[Cross-Reference No_] as barcode
+					from NAV_PROD.dbo.[BAT".'$'."Item Cross Reference] XREF WITH (NOLOCK)
+					where XREF.[Cross-Reference Type] = 3
+					  and XREF.[Item No_] in (".$placeholders.")
+					  and LEN(XREF.[Cross-Reference No_]) > 0
+				) barcode_source
+				order by barcode_source.nav_item_no, barcode_source.barcode";
+		$params = array_merge($item_batch, $item_batch);
+		$dbresult = sqlsrv_query($conn, $sql, $params);
+
+		if ($dbresult === false) {
+			return false;
+		}
+
+		while ($row = sqlsrv_fetch_array($dbresult, SQLSRV_FETCH_ASSOC)) {
+			$item_number = (string)$row['nav_item_no'];
+			$barcode = (string)$row['barcode'];
+			$item_key = 'item:'.$item_number;
+			$barcode_key = 'barcode:'.$barcode;
+
+			if (!isset($barcodes_by_item[$item_key])) {
+				$barcodes_by_item[$item_key] = array();
+			}
+
+			$barcodes_by_item[$item_key][$barcode_key] = $barcode;
+		}
+	}
+
+	return $barcodes_by_item;
+};
+
 $current_page = 1;
 $offset_page = 0;
 $limit_per_page = 10;
@@ -59,6 +103,8 @@ switch($_REQUEST["action"]) {
 
 	// Lagerbestand suchen 	
 	if ($artikelsuche == 'false') {						 
+		$barcode_item_numbers = array();
+		$article_indexes_by_item = array();
 							   
 		$sql = 		" select [lb].[katalogartikelnr] as KANR,[lb].[artikelnr],[lb].[ze] as zustaendikeit,[lb].[Location Code],[lb].[Lagerplatz] as LGP,[ME_Hauptlager],[ME_WE],[Menge_verfuegbar],  \n"
 				. " [NAV_PROD].[dbo].[BAT".'$'."Warehouse Activity Line].[Activity Type] as Activity,  format(NAV_PROD.dbo.[BAT".'$'."Warehouse Activity Line].[Due Date],'d', 'de-de')  as gew_lieferdatum, \n"
@@ -92,6 +138,8 @@ switch($_REQUEST["action"]) {
 		if (sqlsrv_num_rows ($dbresult) > 0) {
 			while($row = sqlsrv_fetch_array($dbresult))
 			{
+				$nav_item_number = (string)$row['artikelnr'];
+				$item_key = 'item:'.$nav_item_number;
 				array_push($result["artikel"],array(
 					"fachnummer"=>$row['LGP'],
 					"art_herst_art_nr"=>utf8_encode(addslashes((string)$row['Vendor Item No_'])),
@@ -107,7 +155,35 @@ switch($_REQUEST["action"]) {
 					"me_we"=>$row['ME_WE'],
 					"Activity_Type"=>$row['Activity'],
 					"gew_lieferdatum"=>$row['gew_lieferdatum'],
+					"barcodes"=>array(),
 				));
+
+				if ($nav_item_number !== '') {
+					$barcode_item_numbers[$item_key] = $nav_item_number;
+
+					if (!isset($article_indexes_by_item[$item_key])) {
+						$article_indexes_by_item[$item_key] = array();
+					}
+
+					$article_indexes_by_item[$item_key][] = count($result["artikel"]) - 1;
+				}
+			}
+		}
+
+		$barcodes_by_item = load_inventory_barcodes(
+			$conn,
+			array_values($barcode_item_numbers)
+		);
+
+		if ($barcodes_by_item !== false) {
+			foreach ($article_indexes_by_item as $item_key => $article_indexes) {
+				$item_barcodes = isset($barcodes_by_item[$item_key])
+					? array_values($barcodes_by_item[$item_key])
+					: array();
+
+				foreach ($article_indexes as $article_index) {
+					$result["artikel"][$article_index]["barcodes"] = $item_barcodes;
+				}
 			}
 		}
 

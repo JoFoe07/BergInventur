@@ -734,7 +734,10 @@ Ext.define('BergInventurModern.view.main.MainController', {
             index,
             record,
             carlanr,
-            manufacturerNumber;
+            manufacturerNumber,
+            barcodes,
+            barcodeIndex,
+            barcodeMatches;
 
         if (normalizedKeyword === '') {
             return matches;
@@ -746,9 +749,22 @@ Ext.define('BergInventurModern.view.main.MainController', {
             manufacturerNumber = this.normalizeArticleIdentifier(
                 record.get('art_herst_art_nr')
             );
+            barcodes = record.get('barcodes');
+            barcodeMatches = false;
+
+            if (Array.isArray(barcodes)) {
+                for (barcodeIndex = 0; barcodeIndex < barcodes.length; barcodeIndex += 1) {
+                    if (this.normalizeArticleIdentifier(barcodes[barcodeIndex]) ===
+                            normalizedKeyword) {
+                        barcodeMatches = true;
+                        break;
+                    }
+                }
+            }
 
             if ((carlanr !== '' && carlanr === normalizedKeyword) ||
-                    (manufacturerNumber !== '' && manufacturerNumber === normalizedKeyword)) {
+                    (manufacturerNumber !== '' && manufacturerNumber === normalizedKeyword) ||
+                    barcodeMatches) {
                 matches.push(record);
             }
         }
