@@ -6,6 +6,7 @@ Ext.define('BergInventurModern.view.main.MainController', {
         'BergInventurModern.store.InventoryItems',
         'Ext.Ajax',
         'Ext.MessageBox',
+        'Ext.Panel',
         'Ext.Toolbar'
     ],
 
@@ -334,47 +335,57 @@ Ext.define('BergInventurModern.view.main.MainController', {
         this.countState.gezaehlt = rawValue;
 
         if (Number(rawValue) != Number(this.countState.menge_im_fach)) {
-            deviationDialog = Ext.create('Ext.MessageBox', {
+            deviationDialog = Ext.create('Ext.Panel', {
                 cls: 'bi-count-deviation-dialog',
-                buttonToolbar: {
-                    docked: 'bottom',
-                    defaultType: 'button',
-                    layout: {
-                        type: 'vbox',
-                        align: 'stretch'
-                    }
-                }
-            });
-            deviationDialog.show({
-                title: 'Mengenabweichung',
-                message: 'Die gezählte Menge stimmt nicht mit dem NAV-Bestand überein.',
-                width: 320,
-                buttons: [
+                centered: true,
+                floated: true,
+                modal: true,
+                hideOnMaskTap: false,
+                padding: 16,
+                width: Math.min(336, Ext.Viewport.getWidth() - 24),
+                layout: {
+                    type: 'vbox',
+                    align: 'stretch'
+                },
+                items: [
                     {
+                        xtype: 'component',
+                        cls: 'bi-count-deviation-title',
+                        html: 'Mengenabweichung'
+                    },
+                    {
+                        xtype: 'component',
+                        cls: 'bi-count-deviation-message',
+                        html: 'Die gezählte Menge stimmt nicht mit dem NAV-Bestand überein.'
+                    },
+                    {
+                        xtype: 'button',
                         itemId: 'yes',
                         cls: 'bi-count-deviation-button',
                         width: '100%',
-                        text: 'SPEICHERN'
+                        text: 'SPEICHERN',
+                        handler: function() {
+                            me.releaseCountCheckLock();
+                            me.markCountReady(true);
+                            deviationDialog.destroy();
+                        }
                     },
                     {
+                        xtype: 'button',
                         itemId: 'no',
                         cls: 'bi-count-deviation-button',
                         width: '100%',
-                        text: 'NEU ZÄHLEN'
+                        text: 'NEU ZÄHLEN',
+                        handler: function() {
+                            me.releaseCountCheckLock();
+                            me.focusCountField();
+                            deviationDialog.destroy();
+                        }
                     }
-                ],
-                fn: function(buttonId) {
-                    me.releaseCountCheckLock();
-
-                    if (buttonId === 'yes') {
-                        me.markCountReady(true);
-                    } else {
-                        me.focusCountField();
-                    }
-
-                    deviationDialog.destroy();
-                }
+                ]
             });
+            Ext.Viewport.add(deviationDialog);
+            deviationDialog.show();
             return;
         }
 

@@ -319,20 +319,27 @@
 }
 
 .bi-count-deviation-dialog {
-    max-width: calc(100% - 24px) !important;
+    max-width: 336px;
     overflow-x: hidden;
 }
 
-.bi-count-deviation-dialog .x-msgbox-text {
+.bi-count-deviation-title {
     width: 100%;
+    margin-bottom: 12px;
+    font-size: 20px;
+    font-weight: 500;
+    line-height: 1.25;
+    white-space: normal;
+    overflow-wrap: break-word;
+}
+
+.bi-count-deviation-message {
+    width: 100%;
+    margin-bottom: 12px;
     white-space: normal;
     overflow: visible;
     overflow-wrap: break-word;
     line-height: 1.35;
-}
-
-.bi-count-deviation-dialog .x-msgbox-buttons {
-    width: 100%;
 }
 
 .bi-count-deviation-button {
