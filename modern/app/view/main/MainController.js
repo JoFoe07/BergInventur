@@ -37,6 +37,28 @@ Ext.define('BergInventurModern.view.main.MainController', {
         button.setText(expand ? 'Weniger' : 'Mehr ›');
     },
 
+    onUserChange: function() {
+        var currentView,
+            loginView;
+
+        if (this.searchInProgress || this.saveInProgress || this.countState !== null ||
+                !this.lookupReference('countView').getHidden()) {
+            return;
+        }
+
+        this.resetInventoryUi();
+        BergInventurModern.session.scanValue = null;
+        BergInventurModern.session.employeeCode = null;
+        BergInventurModern.session.employeeName = null;
+        BergInventurModern.session.standort = null;
+
+        currentView = this.getView();
+        loginView = Ext.create('BergInventurModern.view.login.Login');
+        Ext.Viewport.add(loginView);
+        Ext.Viewport.setActiveItem(loginView);
+        currentView.destroy();
+    },
+
     onArticleModeCheck: function() {
         this.lookupReference('searchField').setPlaceHolder(
             'Hersteller-Nr. oder EAN eingeben, min. 4 Zeichen'
@@ -116,7 +138,7 @@ Ext.define('BergInventurModern.view.main.MainController', {
                     return;
                 }
 
-                if (articleMode === false && records.length > 1) {
+                if (articleMode === false) {
                     me.showMultiResultUi(records);
                     return;
                 }
@@ -428,7 +450,8 @@ Ext.define('BergInventurModern.view.main.MainController', {
 
     handleCountSaveResponse: function(response) {
         var decoded = this.decodeCountSaveResponse(response),
-            countState = this.countState;
+            countState = this.countState,
+            me = this;
 
         if (!decoded.valid) {
             this.handleCountSaveUncertain();
@@ -442,7 +465,10 @@ Ext.define('BergInventurModern.view.main.MainController', {
 
         Ext.Msg.alert(
             'Katalogartikel-Nr. ' + Ext.String.htmlEncode(String(countState.carlanr || '')),
-            'Menge ' + Ext.String.htmlEncode(String(countState.gezaehlt)) + ' wurden eingetragen'
+            'Menge ' + Ext.String.htmlEncode(String(countState.gezaehlt)) + ' wurden eingetragen',
+            function() {
+                me.focusSearchField();
+            }
         );
         this.completeCountSave();
     },
@@ -499,18 +525,7 @@ Ext.define('BergInventurModern.view.main.MainController', {
     },
 
     completeCountSave: function() {
-        var countField = this.lookupReference('countField');
-
-        this.countState = null;
-        this.countCheckInProgress = false;
-        this.saveInProgress = false;
-        this.setCountControlsDisabled(false);
-        countField.setValue('');
-        this.hideCountStatus();
-        this.hideCountSaveButton();
-        this.lookupReference('countView').setHidden(true);
-        this.lookupReference('searchContent').setHidden(false);
-        this.onSearchTap();
+        this.resetInventoryUi();
     },
 
     releaseCountCheckLock: function() {
@@ -682,8 +697,8 @@ Ext.define('BergInventurModern.view.main.MainController', {
         }
 
         if (sameBin) {
-            html = '<strong>Lagerfach ' + Ext.String.htmlEncode(firstBin) + '</strong>' +
-                '<span>' + records.length + ' Artikel</span>';
+            html = '<strong>Lagerfach ' + Ext.String.htmlEncode(firstBin) +
+                ' → ' + records.length + ' Artikel</strong>';
             resultsList.addCls('bi-search-results-single-bin');
         } else {
             html = '<strong>' + records.length + ' Treffer</strong>';
@@ -694,9 +709,16 @@ Ext.define('BergInventurModern.view.main.MainController', {
         summary.setHtml(html);
         summary.setHidden(false);
         field.setValue('');
-        field.setDisabled(false);
-        field.setHidden(false);
-        this.focusArticleScanField();
+
+        if (records.length > 1) {
+            field.setDisabled(false);
+            field.setHidden(false);
+            this.focusArticleScanField();
+        } else {
+            field.setDisabled(true);
+            field.setHidden(true);
+            this.focusSearchField();
+        }
     },
 
     hideMultiResultUi: function() {
@@ -781,11 +803,30 @@ Ext.define('BergInventurModern.view.main.MainController', {
     },
 
     finishArticleLookupFailure: function(message) {
-        var field = this.lookupReference('articleScanField');
-
         this.showMessage(message);
-        field.setValue('');
         this.focusArticleScanField();
+    },
+
+    resetInventoryUi: function() {
+        var countField = this.lookupReference('countField'),
+            searchField = this.lookupReference('searchField');
+
+        this.countState = null;
+        this.countCheckInProgress = false;
+        this.saveInProgress = false;
+        this.searchInProgress = false;
+        this.setCountControlsDisabled(false);
+        countField.setValue('');
+        countField.blur();
+        searchField.setValue('');
+        this.getSearchStore().removeAll();
+        this.hideCountStatus();
+        this.hideCountSaveButton();
+        this.hideMessage();
+        this.hideSelectedResult();
+        this.hideMultiResultUi();
+        this.lookupReference('countView').setHidden(true);
+        this.lookupReference('searchContent').setHidden(false);
     },
 
     getSearchStore: function() {

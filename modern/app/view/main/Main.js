@@ -211,6 +211,15 @@ Ext.define('BergInventurModern.view.main.Main', {
                                     xtype: 'component',
                                     reference: 'versionDisplay',
                                     cls: 'bi-search-version'
+                                },
+                                {
+                                    xtype: 'button',
+                                    reference: 'changeUserButton',
+                                    cls: 'bi-search-user-change',
+                                    text: 'BENUTZER WECHSELN',
+                                    listeners: {
+                                        tap: 'onUserChange'
+                                    }
                                 }
                             ]
                         }
