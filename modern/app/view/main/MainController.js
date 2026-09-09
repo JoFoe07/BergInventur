@@ -340,10 +340,14 @@ Ext.define('BergInventurModern.view.main.MainController', {
                 buttons: [
                     {
                         itemId: 'yes',
+                        cls: 'bi-count-deviation-button',
+                        flex: 1,
                         text: 'SPEICHERN'
                     },
                     {
                         itemId: 'no',
+                        cls: 'bi-count-deviation-button',
+                        flex: 1,
                         text: 'NEU ZÄHLEN'
                     }
                 ],

@@ -224,6 +224,12 @@
 
 .bi-search-result-info {
     color: #0c00ff;
+    max-width: 100%;
+    white-space: normal;
+    overflow: visible;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    line-height: 1.35;
 }
 
 .bi-search-selection {
@@ -310,6 +316,16 @@
     width: 100%;
     min-height: 54px;
     margin-bottom: 10px;
+}
+
+.bi-count-deviation-button {
+    min-width: 0;
+}
+
+.bi-count-deviation-button .x-button-label {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
 }
 
 @media (max-width: 600px) {
