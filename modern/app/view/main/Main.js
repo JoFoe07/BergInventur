@@ -297,8 +297,6 @@ Ext.define('BergInventurModern.view.main.Main', {
                     cls: 'bi-search-results',
                     flex: 1,
                     scrollable: 'vertical',
-                    deferEmptyText: true,
-                    emptyText: 'Es wurden keine Artikel gefunden.',
                     itemTpl: [
                         '<div class="bi-search-result-card">',
                         '  <div class="bi-search-result-manufacturer"><strong>Hersteller-Art.-Nr.:</strong> {art_herst_art_nr:htmlEncode}</div>',
@@ -332,6 +330,7 @@ Ext.define('BergInventurModern.view.main.Main', {
     },
 
     setLoginResult: function(employeeName, standortName) {
+        this.standortDisplayName = standortName;
         this.down('#sessionSummaryText').setHtml(
             Ext.String.htmlEncode(employeeName + ' · ' + standortName)
         );
@@ -339,5 +338,9 @@ Ext.define('BergInventurModern.view.main.Main', {
         this.down('#standortName').setHtml(Ext.String.htmlEncode(standortName));
         this.down('#sessionDetails').setHidden(true);
         this.down('#sessionToggleButton').setText('Mehr ›');
+    },
+
+    getStandortDisplayName: function() {
+        return this.standortDisplayName || '';
     }
 });

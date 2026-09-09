@@ -60,17 +60,27 @@ Ext.define('BergInventurModern.view.main.MainController', {
     },
 
     onArticleModeCheck: function() {
-        this.lookupReference('searchField').setPlaceHolder(
+        this.resetSearchModeUi(
             'Hersteller-Nr. oder EAN eingeben, min. 4 Zeichen'
         );
-        this.hideMultiResultUi();
     },
 
     onArticleModeUncheck: function() {
-        this.lookupReference('searchField').setPlaceHolder(
+        this.resetSearchModeUi(
             'Lagerfach min. 6 Zeichen eingeben'
         );
+    },
+
+    resetSearchModeUi: function(placeHolder) {
+        var searchField = this.lookupReference('searchField');
+
+        searchField.setValue('');
         this.hideMultiResultUi();
+        this.getSearchStore().removeAll();
+        this.hideMessage();
+        this.hideSelectedResult();
+        searchField.setPlaceHolder(placeHolder);
+        this.focusSearchField();
     },
 
     onSearchKeyup: function(textfield, e) {
@@ -247,15 +257,12 @@ Ext.define('BergInventurModern.view.main.MainController', {
             activityType: activityType
         };
 
-        this.setCountDisplay(
-            'countEmployeeDisplay',
-            'Mitarbeiter',
-            BergInventurModern.session.employeeName
-        );
-        this.setCountDisplay(
-            'countStandortDisplay',
-            'Standort',
-            BergInventurModern.session.standort
+        this.lookupReference('countSessionDisplay').setHtml(
+            Ext.String.htmlEncode(
+                String(BergInventurModern.session.employeeName || '') + ' · ' +
+                String(this.getView().getStandortDisplayName() ||
+                    BergInventurModern.session.standort || '')
+            )
         );
         this.setCountDisplay('countBinDisplay', 'Lagerfach', this.countState.fachnummer);
         this.setCountDisplay(
@@ -327,21 +334,17 @@ Ext.define('BergInventurModern.view.main.MainController', {
 
         if (Number(rawValue) != Number(this.countState.menge_im_fach)) {
             Ext.Msg.show({
-                title: 'Abweichungen in der Menge',
-                message: Ext.String.htmlEncode(
-                    String(BergInventurModern.session.employeeName || '')
-                ) + ', ' +
-                    'das Ergebnis stimmt nicht mit dem Bestand der NAV überein.' +
-                    'Möchten Sie trotzdem den gezählten Bestand speichern?',
+                title: 'Mengenabweichung',
+                message: 'Die gezählte Menge stimmt nicht mit dem NAV-Bestand überein.',
                 width: 320,
                 buttons: [
                     {
                         itemId: 'yes',
-                        text: 'Ja'
+                        text: 'SPEICHERN'
                     },
                     {
                         itemId: 'no',
-                        text: 'noch einmal zählen'
+                        text: 'NEU ZÄHLEN'
                     }
                 ],
                 fn: function(buttonId) {

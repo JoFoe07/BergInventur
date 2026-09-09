@@ -24,13 +24,8 @@ Ext.define('BergInventurModern.view.count.Count', {
         },
         {
             xtype: 'component',
-            reference: 'countEmployeeDisplay',
-            cls: 'bi-count-row'
-        },
-        {
-            xtype: 'component',
-            reference: 'countStandortDisplay',
-            cls: 'bi-count-row'
+            reference: 'countSessionDisplay',
+            cls: 'bi-count-session'
         },
         {
             xtype: 'component',
