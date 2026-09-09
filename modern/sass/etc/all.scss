@@ -318,8 +318,28 @@
     margin-bottom: 10px;
 }
 
+.bi-count-deviation-dialog {
+    max-width: calc(100% - 24px) !important;
+    overflow-x: hidden;
+}
+
+.bi-count-deviation-dialog .x-msgbox-text {
+    width: 100%;
+    white-space: normal;
+    overflow: visible;
+    overflow-wrap: break-word;
+    line-height: 1.35;
+}
+
+.bi-count-deviation-dialog .x-msgbox-buttons {
+    width: 100%;
+}
+
 .bi-count-deviation-button {
+    width: 100%;
     min-width: 0;
+    min-height: 48px;
+    margin: 3px 0;
 }
 
 .bi-count-deviation-button .x-button-label {

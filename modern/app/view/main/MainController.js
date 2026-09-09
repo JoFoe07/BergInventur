@@ -309,7 +309,8 @@ Ext.define('BergInventurModern.view.main.MainController', {
     onCountCheck: function() {
         var countField = this.lookupReference('countField'),
             rawValue = this.getRawCountValue(countField),
-            me = this;
+            me = this,
+            deviationDialog;
 
         if (!this.countState || this.countCheckInProgress) {
             return;
@@ -333,7 +334,18 @@ Ext.define('BergInventurModern.view.main.MainController', {
         this.countState.gezaehlt = rawValue;
 
         if (Number(rawValue) != Number(this.countState.menge_im_fach)) {
-            Ext.Msg.show({
+            deviationDialog = Ext.create('Ext.MessageBox', {
+                cls: 'bi-count-deviation-dialog',
+                buttonToolbar: {
+                    docked: 'bottom',
+                    defaultType: 'button',
+                    layout: {
+                        type: 'vbox',
+                        align: 'stretch'
+                    }
+                }
+            });
+            deviationDialog.show({
                 title: 'Mengenabweichung',
                 message: 'Die gezählte Menge stimmt nicht mit dem NAV-Bestand überein.',
                 width: 320,
@@ -341,13 +353,13 @@ Ext.define('BergInventurModern.view.main.MainController', {
                     {
                         itemId: 'yes',
                         cls: 'bi-count-deviation-button',
-                        flex: 1,
+                        width: '100%',
                         text: 'SPEICHERN'
                     },
                     {
                         itemId: 'no',
                         cls: 'bi-count-deviation-button',
-                        flex: 1,
+                        width: '100%',
                         text: 'NEU ZÄHLEN'
                     }
                 ],
@@ -359,6 +371,8 @@ Ext.define('BergInventurModern.view.main.MainController', {
                     } else {
                         me.focusCountField();
                     }
+
+                    deviationDialog.destroy();
                 }
             });
             return;
